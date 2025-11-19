@@ -209,40 +209,48 @@ function activarMovimiento() {
   if (estado.movimientoActivo) return;
   estado.movimientoActivo = true;
 
-  // estado del gesto: necesito volver a "neutro" entre gesto y gesto
   let estadoGesto = "neutro";
+  let ultimoGestoMs = 0;
+  const COOLDOWN_MS = 900;
 
-  // Cuánto hay que inclinar (en grados)
-  // mientras más grande, más fuerte hay que mover el celu
-  const UMBRAL_ARRIBA = -35; // inclinar bastante hacia atrás (ARRIBA)
-  const UMBRAL_ABAJO = 35;   // inclinar bastante hacia adelante (ABAJO)
-  const ZONA_NEUTRA = 10;    // rango de "celu derecho"
+  // gamma = inclinación IZQ/DERECHA del teléfono,
+  // pero cuando lo sostenés horizontal, se convierte en ARRIBA/ABAJO
+  const UMBRAL_ARRIBA = 25;   // hacia tu cara (arriba)
+  const UMBRAL_ABAJO = -25;   // hacia adelante (abajo)
+  const ZONA_NEUTRA = 10;     // rango sin activar gestos
 
   window.addEventListener("deviceorientation", (event) => {
     if (estado.tiempoRestante <= 0) return;
 
-    const beta = event.beta; // ángulo adelante/atrás
-    if (beta === null) return;
+    const gamma = event.gamma;  // eje que realmente funciona bien
+    if (gamma == null) return;
 
-    // 1) Si el celu vuelve a casi derecho, reseteo el gesto
-    if (beta > -ZONA_NEUTRA && beta < ZONA_NEUTRA) {
+    const ahora = Date.now();
+
+    // Cooldown: no permitir gestos demasiado seguidos
+    if (ahora - ultimoGestoMs < COOLDOWN_MS) return;
+
+    // Volvió a neutro
+    if (gamma > -ZONA_NEUTRA && gamma < ZONA_NEUTRA) {
       estadoGesto = "neutro";
       return;
     }
 
-    // 2) Si ya hice un gesto y no volví a neutro, no hago nada
+    // Ya hicimos un gesto y no volvió a neutro
     if (estadoGesto !== "neutro") return;
 
-    // 3) ARRIBA = CORRECTO (inclinar hacia atrás)
-    if (beta <= UMBRAL_ARRIBA) {
+    // ARRIBA → gamma POSITIVO
+    if (gamma >= UMBRAL_ARRIBA) {
       estadoGesto = "arriba";
-      accionCorrecto();   // ✅ CORRECTO
+      ultimoGestoMs = ahora;
+      accionCorrecto();   // 🟢 CORRECTO
       return;
     }
 
-    // 4) ABAJO = PASAR (inclinar hacia adelante)
-    if (beta >= UMBRAL_ABAJO) {
+    // ABAJO → gamma NEGATIVO
+    if (gamma <= UMBRAL_ABAJO) {
       estadoGesto = "abajo";
+      ultimoGestoMs = ahora;
       accionPasar();      // ⏭️ PASAR
       return;
     }
