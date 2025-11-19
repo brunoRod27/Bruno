@@ -187,4 +187,5 @@ const personas = [
      { nombre: "Eloy Vargas", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
      { nombre: "Dwayne Curtis", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Maozinha", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
+    { nombre: "Jason Granger", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
 ];
