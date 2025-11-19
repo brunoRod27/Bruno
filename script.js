@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // ==============================
 // ESTADO DEL JUEGO
 // ==============================
@@ -210,41 +209,46 @@ function activarMovimiento() {
   if (estado.movimientoActivo) return;
   estado.movimientoActivo = true;
 
-  let ultimo = null;
-  let ultimoGestoMs = 0;
-  const UMBRAL = 22;
-  const COOLDOWN_MS = 800;
+  // estado del gesto: necesito volver a "neutro" entre gesto y gesto
+  let estadoGesto = "neutro";
+
+  // Cuánto hay que inclinar (en grados)
+  // mientras más grande, más fuerte hay que mover el celu
+  const UMBRAL_ARRIBA = -35; // inclinar bastante hacia atrás (ARRIBA)
+  const UMBRAL_ABAJO = 35;   // inclinar bastante hacia adelante (ABAJO)
+  const ZONA_NEUTRA = 10;    // rango de "celu derecho"
 
   window.addEventListener("deviceorientation", (event) => {
     if (estado.tiempoRestante <= 0) return;
 
-    const beta = event.beta;
+    const beta = event.beta; // ángulo adelante/atrás
     if (beta === null) return;
 
-    if (ultimo === null) {
-      ultimo = beta;
+    // 1) Si el celu vuelve a casi derecho, reseteo el gesto
+    if (beta > -ZONA_NEUTRA && beta < ZONA_NEUTRA) {
+      estadoGesto = "neutro";
       return;
     }
 
-    const dif = beta - ultimo;
-    ultimo = beta;
+    // 2) Si ya hice un gesto y no volví a neutro, no hago nada
+    if (estadoGesto !== "neutro") return;
 
-    const ahora = Date.now();
-    if (ahora - ultimoGestoMs < COOLDOWN_MS) {
+    // 3) ARRIBA = CORRECTO (inclinar hacia atrás)
+    if (beta <= UMBRAL_ARRIBA) {
+      estadoGesto = "arriba";
+      accionCorrecto();   // ✅ CORRECTO
       return;
     }
 
-    if (dif < -UMBRAL) {
-      ultimoGestoMs = ahora;
-      accionCorrecto();
-    }
-
-    if (dif > UMBRAL) {
-      ultimoGestoMs = ahora;
-      accionPasar();
+    // 4) ABAJO = PASAR (inclinar hacia adelante)
+    if (beta >= UMBRAL_ABAJO) {
+      estadoGesto = "abajo";
+      accionPasar();      // ⏭️ PASAR
+      return;
     }
   });
 }
+
 
 // ==============================
 // EVENTOS DE BOTONES
@@ -286,292 +290,3 @@ if ("serviceWorker" in navigator) {
 }
 
 
-=======
-// ==============================
-// ESTADO DEL JUEGO
-// ==============================
-const estado = {
-  modoCharadas: null,     // "jugadores" o "clubes"
-  actual: null,           // guarda el objeto o string actual
-  tiempoRestante: 0,      // en segundos
-  puntaje: 0,             // 10 puntos por acierto
-  timerId: null,          // id del setInterval
-  movimientoActivo: false // para no activar dos veces el sensor
-};
-
-// ==============================
-// REFERENCIAS AL DOM
-// ==============================
-const bloqueJugadores = document.getElementById("bloque-jugadores");
-const bloqueClubes = document.getElementById("bloque-clubes");
-
-const pantallaMenu = document.querySelector(".grid-opciones");
-const pantallaJuego = document.getElementById("pantalla-juego");
-
-const modoLabel = document.getElementById("modo-label");
-const palabraSpan = document.getElementById("palabra-actual");
-const timerSpan = document.getElementById("timer");
-const puntajeSpan = document.getElementById("puntaje");
-
-const btnVolver = document.getElementById("btn-volver");
-const btnCorrecto = document.getElementById("btn-correcto");
-const btnPasar = document.getElementById("btn-pasar");
-
-const palabraWrapper = document.querySelector(".palabra-wrapper");
-
-// ==============================
-// FUNCIONES: PALABRAS
-// ==============================
-function obtenerNuevaPalabra() {
-  if (estado.modoCharadas === "jugadores") {
-    const i = Math.floor(Math.random() * personas.length);
-    estado.actual = personas[i]; // objeto { nombre, club, etc }
-    return estado.actual.nombre;
-  }
-
-  if (estado.modoCharadas === "clubes") {
-    const i = Math.floor(Math.random() * clubesLUB.length);
-    estado.actual = clubesLUB[i]; // string
-    return estado.actual;
-  }
-
-  return "-";
-}
-
-function actualizarPalabra() {
-  const palabra = obtenerNuevaPalabra();
-  palabraSpan.textContent = palabra;
-}
-
-// ==============================
-// FUNCIONES: UI PUNTAJE / TIEMPO
-// ==============================
-function actualizarUITiempo() {
-  timerSpan.textContent = estado.tiempoRestante + "s";
-}
-
-function actualizarUIPuntaje() {
-  puntajeSpan.textContent = estado.puntaje;
-}
-
-function feedbackVisual(tipo) {
-  if (!palabraWrapper) return;
-
-  palabraWrapper.classList.remove(
-    "palabra-wrapper--correcto",
-    "palabra-wrapper--pasar"
-  );
-
-  if (tipo === "correcto") {
-    palabraWrapper.classList.add("palabra-wrapper--correcto");
-  } else if (tipo === "pasar") {
-    palabraWrapper.classList.add("palabra-wrapper--pasar");
-  }
-
-  setTimeout(() => {
-    palabraWrapper.classList.remove(
-      "palabra-wrapper--correcto",
-      "palabra-wrapper--pasar"
-    );
-  }, 220);
-}
-
-// ==============================
-// FUNCIONES: RONDA / TIMER
-// ==============================
-function iniciarRonda() {
-  estado.tiempoRestante = 40; // límite de 40 segundos
-  estado.puntaje = 0;
-  actualizarUITiempo();
-  actualizarUIPuntaje();
-
-  if (estado.timerId !== null) {
-    clearInterval(estado.timerId);
-  }
-
-  estado.timerId = setInterval(() => {
-    estado.tiempoRestante--;
-    actualizarUITiempo();
-
-    if (estado.tiempoRestante <= 0) {
-      finalizarRonda();
-    }
-  }, 1000);
-
-  actualizarPalabra();
-}
-
-function finalizarRonda() {
-  if (estado.timerId !== null) {
-    clearInterval(estado.timerId);
-    estado.timerId = null;
-  }
-
-  estado.tiempoRestante = 0;
-  actualizarUITiempo();
-  palabraSpan.textContent = "¡Tiempo!";
-}
-
-// ==============================
-// FUNCIONES: ACCIONES DEL JUEGO
-// ==============================
-function accionCorrecto() {
-  if (estado.tiempoRestante <= 0) return;
-
-  estado.puntaje += 10;
-  actualizarUIPuntaje();
-  feedbackVisual("correcto");
-  actualizarPalabra();
-}
-
-function accionPasar() {
-  if (estado.tiempoRestante <= 0) return;
-
-  feedbackVisual("pasar");
-  actualizarPalabra();
-}
-
-// ==============================
-// CAMBIO DE PANTALLAS
-// ==============================
-function irAJuego(modo) {
-  estado.modoCharadas = modo;
-
-  if (modo === "jugadores") {
-    modoLabel.textContent = "Modo: Jugadores / DTs";
-  } else if (modo === "clubes") {
-    modoLabel.textContent = "Modo: Clubes";
-  } else {
-    modoLabel.textContent = "Modo: -";
-  }
-
-  pantallaMenu.classList.add("hidden");
-  pantallaJuego.classList.remove("hidden");
-
-  iniciarRonda();
-  pedirPermisoMovimiento();
-}
-
-function volverAlMenu() {
-  estado.modoCharadas = null;
-  estado.actual = null;
-
-  if (estado.timerId !== null) {
-    clearInterval(estado.timerId);
-    estado.timerId = null;
-  }
-
-  palabraSpan.textContent = "-";
-  timerSpan.textContent = "40s";
-  puntajeSpan.textContent = "0";
-  modoLabel.textContent = "Modo: -";
-
-  pantallaJuego.classList.add("hidden");
-  pantallaMenu.classList.remove("hidden");
-}
-
-// ==============================
-// CONTROL POR MOVIMIENTO (TILT)
-// ==============================
-function pedirPermisoMovimiento() {
-  if (
-    typeof DeviceOrientationEvent !== "undefined" &&
-    typeof DeviceOrientationEvent.requestPermission === "function"
-  ) {
-    DeviceOrientationEvent.requestPermission()
-      .then((resp) => {
-        if (resp === "granted") {
-          activarMovimiento();
-        } else {
-          console.warn("No se otorgó permiso para el movimiento.");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  } else {
-    activarMovimiento();
-  }
-}
-
-function activarMovimiento() {
-  if (estado.movimientoActivo) return;
-  estado.movimientoActivo = true;
-
-  let ultimo = null;
-  let ultimoGestoMs = 0;
-  const UMBRAL = 15;
-  const COOLDOWN_MS = 800;
-
-  window.addEventListener("deviceorientation", (event) => {
-    if (estado.tiempoRestante <= 0) return;
-
-    const beta = event.beta;
-    if (beta === null) return;
-
-    if (ultimo === null) {
-      ultimo = beta;
-      return;
-    }
-
-    const dif = beta - ultimo;
-    ultimo = beta;
-
-    const ahora = Date.now();
-    if (ahora - ultimoGestoMs < COOLDOWN_MS) {
-      return;
-    }
-
-    if (dif < -UMBRAL) {
-      ultimoGestoMs = ahora;
-      accionCorrecto();
-    }
-
-    if (dif > UMBRAL) {
-      ultimoGestoMs = ahora;
-      accionPasar();
-    }
-  });
-}
-
-// ==============================
-// EVENTOS DE BOTONES
-// ==============================
-bloqueJugadores.addEventListener("click", () => {
-  irAJuego("jugadores");
-});
-
-bloqueClubes.addEventListener("click", () => {
-  irAJuego("clubes");
-});
-
-btnVolver.addEventListener("click", () => {
-  volverAlMenu();
-});
-
-btnCorrecto.addEventListener("click", () => {
-  accionCorrecto();
-});
-
-btnPasar.addEventListener("click", () => {
-  accionPasar();
-});
-
-// ==============================
-// SERVICE WORKER (opcional)
-// ==============================
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./service-worker.js")
-      .then(() => {
-        console.log("Service Worker registrado correctamente");
-      })
-      .catch((err) => {
-        console.error("Error registrando el Service Worker", err);
-      });
-  });
-}
-
-
->>>>>>> 77923753a157f584eb6e9ecf4d1653fdb0b72fe3
