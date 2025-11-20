@@ -91,7 +91,7 @@ function feedbackVisual(tipo) {
 // FUNCIONES: RONDA / TIMER
 // ==============================
 function iniciarRonda() {
-  estado.tiempoRestante = 40; // límite de 40 segundos
+  estado.tiempoRestante = 120; // límite de 40 segundos
   estado.puntaje = 0;
   actualizarUITiempo();
   actualizarUIPuntaje();
