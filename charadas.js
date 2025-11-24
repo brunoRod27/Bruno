@@ -1,24 +1,40 @@
 // ==============================
+// CONFIG
+// ==============================
+const DURACION_RONDA_SEG = 120;
+
+// ==============================
 // ESTADO DEL JUEGO
 // ==============================
 const estado = {
-  modoCharadas: null,     // "jugadores" o "clubes"
-  actual: null,           // guarda el objeto o string actual
-  tiempoRestante: 0,      // en segundos
-  puntaje: 0,             // 10 puntos por acierto
-  timerId: null,          // id del setInterval
-  movimientoActivo: false // para no activar dos veces el sensor
+  modoCharadas: null,   // "jugadores" o "clubes"
+  actual: null,         // objeto o string actual
+  tiempoRestante: 0,
+  puntaje: 0,
+  timerId: null,
+  movimientoActivo: false,
+  poolActual: []        // palabras disponibles sin repetir
 };
 
 // ==============================
 // REFERENCIAS AL DOM
 // ==============================
+
+// Menú principal
+const menuPrincipal = document.getElementById("menu-principal");
+const btnIrCharadas = document.getElementById("btn-ir-charadas");
+
+// Pantalla charadas
+const pantallaCharadas = document.getElementById("pantalla-charadas");
+const menuCharadas = document.getElementById("menu-charadas");
+const btnVolverMenu = document.getElementById("btn-volver-menu");
+
+// Opciones del menú interno
 const bloqueJugadores = document.getElementById("bloque-jugadores");
 const bloqueClubes = document.getElementById("bloque-clubes");
 
-const pantallaMenu = document.querySelector(".grid-opciones");
+// Pantalla de juego
 const pantallaJuego = document.getElementById("pantalla-juego");
-
 const modoLabel = document.getElementById("modo-label");
 const palabraSpan = document.getElementById("palabra-actual");
 const timerSpan = document.getElementById("timer");
@@ -30,32 +46,43 @@ const btnPasar = document.getElementById("btn-pasar");
 
 const palabraWrapper = document.querySelector(".palabra-wrapper");
 
+
 // ==============================
-// FUNCIONES: PALABRAS
+// POOL DE PALABRAS (SIN REPETIR)
 // ==============================
-function obtenerNuevaPalabra() {
+function resetearPool() {
   if (estado.modoCharadas === "jugadores") {
-    const i = Math.floor(Math.random() * personas.length);
-    estado.actual = personas[i]; // objeto { nombre, club, etc }
-    return estado.actual.nombre;
+    estado.poolActual = [...personas];
+  } else if (estado.modoCharadas === "clubes") {
+    estado.poolActual = [...clubesLUB];
+  }
+}
+
+function obtenerNuevaPalabra() {
+  if (!estado.modoCharadas) return "-";
+
+  // Si el pool está vacío, se reinicia
+  if (estado.poolActual.length === 0) {
+    resetearPool();
   }
 
-  if (estado.modoCharadas === "clubes") {
-    const i = Math.floor(Math.random() * clubesLUB.length);
-    estado.actual = clubesLUB[i]; // string
-    return estado.actual;
-  }
+  const idx = Math.floor(Math.random() * estado.poolActual.length);
+  const elemento = estado.poolActual.splice(idx, 1)[0];
+  estado.actual = elemento;
+
+  if (estado.modoCharadas === "jugadores") return elemento.nombre;
+  if (estado.modoCharadas === "clubes") return elemento;
 
   return "-";
 }
 
 function actualizarPalabra() {
-  const palabra = obtenerNuevaPalabra();
-  palabraSpan.textContent = palabra;
+  palabraSpan.textContent = obtenerNuevaPalabra();
 }
 
+
 // ==============================
-// FUNCIONES: UI PUNTAJE / TIEMPO
+// UI TIEMPO / PUNTAJE
 // ==============================
 function actualizarUITiempo() {
   timerSpan.textContent = estado.tiempoRestante + "s";
@@ -66,18 +93,13 @@ function actualizarUIPuntaje() {
 }
 
 function feedbackVisual(tipo) {
-  if (!palabraWrapper) return;
-
   palabraWrapper.classList.remove(
     "palabra-wrapper--correcto",
     "palabra-wrapper--pasar"
   );
 
-  if (tipo === "correcto") {
-    palabraWrapper.classList.add("palabra-wrapper--correcto");
-  } else if (tipo === "pasar") {
-    palabraWrapper.classList.add("palabra-wrapper--pasar");
-  }
+  if (tipo === "correcto") palabraWrapper.classList.add("palabra-wrapper--correcto");
+  if (tipo === "pasar")    palabraWrapper.classList.add("palabra-wrapper--pasar");
 
   setTimeout(() => {
     palabraWrapper.classList.remove(
@@ -87,18 +109,18 @@ function feedbackVisual(tipo) {
   }, 220);
 }
 
+
 // ==============================
-// FUNCIONES: RONDA / TIMER
+// RONDA / TIMER
 // ==============================
 function iniciarRonda() {
-  estado.tiempoRestante = 120; // límite de 40 segundos
+  estado.tiempoRestante = DURACION_RONDA_SEG;
   estado.puntaje = 0;
+
   actualizarUITiempo();
   actualizarUIPuntaje();
 
-  if (estado.timerId !== null) {
-    clearInterval(estado.timerId);
-  }
+  if (estado.timerId) clearInterval(estado.timerId);
 
   estado.timerId = setInterval(() => {
     estado.tiempoRestante--;
@@ -109,22 +131,22 @@ function iniciarRonda() {
     }
   }, 1000);
 
+  resetearPool();
   actualizarPalabra();
 }
 
 function finalizarRonda() {
-  if (estado.timerId !== null) {
-    clearInterval(estado.timerId);
-    estado.timerId = null;
-  }
+  clearInterval(estado.timerId);
+  estado.timerId = null;
 
   estado.tiempoRestante = 0;
   actualizarUITiempo();
   palabraSpan.textContent = "¡Tiempo!";
 }
 
+
 // ==============================
-// FUNCIONES: ACCIONES DEL JUEGO
+// ACCIONES DEL JUEGO
 // ==============================
 function accionCorrecto() {
   if (estado.tiempoRestante <= 0) return;
@@ -142,64 +164,53 @@ function accionPasar() {
   actualizarPalabra();
 }
 
+
 // ==============================
 // CAMBIO DE PANTALLAS
 // ==============================
 function irAJuego(modo) {
   estado.modoCharadas = modo;
 
-  if (modo === "jugadores") {
-    modoLabel.textContent = "Modo: Jugadores / DTs";
-  } else if (modo === "clubes") {
-    modoLabel.textContent = "Modo: Clubes";
-  } else {
-    modoLabel.textContent = "Modo: -";
-  }
+  modoLabel.textContent =
+    modo === "jugadores" ? "Modo: Jugadores / DTs" :
+    modo === "clubes"    ? "Modo: Clubes" :
+                           "Modo: -";
 
-  pantallaMenu.classList.add("hidden");
+  menuCharadas.classList.add("hidden");
   pantallaJuego.classList.remove("hidden");
 
   iniciarRonda();
   pedirPermisoMovimiento();
 }
 
-function volverAlMenu() {
+function volverAlMenuCharadas() {
   estado.modoCharadas = null;
   estado.actual = null;
+  estado.poolActual = [];
 
-  if (estado.timerId !== null) {
-    clearInterval(estado.timerId);
-    estado.timerId = null;
-  }
-
-  palabraSpan.textContent = "-";
-  timerSpan.textContent = "40s";
-  puntajeSpan.textContent = "0";
-  modoLabel.textContent = "Modo: -";
+  if (estado.timerId) clearInterval(estado.timerId);
 
   pantallaJuego.classList.add("hidden");
-  pantallaMenu.classList.remove("hidden");
+  menuCharadas.classList.remove("hidden");
+
+  palabraSpan.textContent = "-";
+  timerSpan.textContent = DURACION_RONDA_SEG + "s";
+  puntajeSpan.textContent = "0";
+  modoLabel.textContent = "Modo: -";
 }
 
+
 // ==============================
-// CONTROL POR MOVIMIENTO (TILT)
+// SENSOR DE MOVIMIENTO
 // ==============================
 function pedirPermisoMovimiento() {
-  if (
-    typeof DeviceOrientationEvent !== "undefined" &&
-    typeof DeviceOrientationEvent.requestPermission === "function"
-  ) {
+  if (typeof DeviceOrientationEvent !== "undefined" &&
+      typeof DeviceOrientationEvent.requestPermission === "function") {
+
     DeviceOrientationEvent.requestPermission()
-      .then((resp) => {
-        if (resp === "granted") {
-          activarMovimiento();
-        } else {
-          console.warn("No se otorgó permiso para el movimiento.");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+      .then(resp => { if (resp === "granted") activarMovimiento(); })
+      .catch(console.error);
+
   } else {
     activarMovimiento();
   }
@@ -211,48 +222,38 @@ function activarMovimiento() {
 
   let estadoGesto = "neutro";
   let ultimoGestoMs = 0;
-  const COOLDOWN_MS = 900;
+  const COOLDOWN = 900;
 
-  // gamma = inclinación IZQ/DERECHA del teléfono,
-  // pero cuando lo sostenés horizontal, se convierte en ARRIBA/ABAJO
-  const UMBRAL_ARRIBA = 25;   // hacia tu cara (arriba)
-  const UMBRAL_ABAJO = -25;   // hacia adelante (abajo)
-  const ZONA_NEUTRA = 10;     // rango sin activar gestos
+  const UMBRAL_ARRIBA = 25;
+  const UMBRAL_ABAJO = -25;
+  const ZONA_NEUTRA = 10;
 
   window.addEventListener("deviceorientation", (event) => {
     if (estado.tiempoRestante <= 0) return;
 
-    const gamma = event.gamma;  // eje que realmente funciona bien
+    const gamma = event.gamma;
     if (gamma == null) return;
 
     const ahora = Date.now();
+    if (ahora - ultimoGestoMs < COOLDOWN) return;
 
-    // Cooldown: no permitir gestos demasiado seguidos
-    if (ahora - ultimoGestoMs < COOLDOWN_MS) return;
-
-    // Volvió a neutro
     if (gamma > -ZONA_NEUTRA && gamma < ZONA_NEUTRA) {
       estadoGesto = "neutro";
       return;
     }
 
-    // Ya hicimos un gesto y no volvió a neutro
     if (estadoGesto !== "neutro") return;
 
-    // ARRIBA → gamma POSITIVO
     if (gamma >= UMBRAL_ARRIBA) {
       estadoGesto = "arriba";
       ultimoGestoMs = ahora;
-      accionCorrecto();   // 🟢 CORRECTO
-      return;
+      accionCorrecto();
     }
 
-    // ABAJO → gamma NEGATIVO
     if (gamma <= UMBRAL_ABAJO) {
       estadoGesto = "abajo";
       ultimoGestoMs = ahora;
-      accionPasar();      // ⏭️ PASAR
-      return;
+      accionPasar();
     }
   });
 }
@@ -261,40 +262,40 @@ function activarMovimiento() {
 // ==============================
 // EVENTOS DE BOTONES
 // ==============================
-bloqueJugadores.addEventListener("click", () => {
-  irAJuego("jugadores");
+
+// ➤ Entrar al modo charadas
+btnIrCharadas.addEventListener("click", () => {
+  menuPrincipal.classList.add("hidden");
+  pantallaCharadas.classList.remove("hidden");
 });
 
-bloqueClubes.addEventListener("click", () => {
-  irAJuego("clubes");
+// ➤ Elegir Jugadores / Clubes
+bloqueJugadores.addEventListener("click", () => irAJuego("jugadores"));
+bloqueClubes.addEventListener("click", () => irAJuego("clubes"));
+
+// ➤ Volver desde partida al menú interno
+btnVolver.addEventListener("click", volverAlMenuCharadas);
+
+// ➤ Botones Correcto / Pasar
+btnCorrecto.addEventListener("click", accionCorrecto);
+btnPasar.addEventListener("click", accionPasar);
+
+// ➤ Volver al menú principal
+btnVolverMenu.addEventListener("click", () => {
+  pantallaCharadas.classList.add("hidden");
+  menuPrincipal.classList.remove("hidden");
 });
 
-btnVolver.addEventListener("click", () => {
-  volverAlMenu();
-});
-
-btnCorrecto.addEventListener("click", () => {
-  accionCorrecto();
-});
-
-btnPasar.addEventListener("click", () => {
-  accionPasar();
-});
 
 // ==============================
 // SERVICE WORKER (opcional)
 // ==============================
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./service-worker.js")
-      .then(() => {
-        console.log("Service Worker registrado correctamente");
-      })
-      .catch((err) => {
-        console.error("Error registrando el Service Worker", err);
-      });
+    navigator.serviceWorker.register("./service-worker.js");
   });
 }
+
+
 
 

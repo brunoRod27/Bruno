@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
   <head>
@@ -8,12 +7,10 @@
 
     <meta name="theme-color" content="#000000" />
 
-    <!-- Fuente -->
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
     />
-
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -21,60 +18,84 @@
     <div class="app">
       <header class="header">
         <h1 class="titulo">Charadas LUB</h1>
-        <p class="subtitulo">Elegí qué querés adivinar</p>
+        <p class="subtitulo">Elegí cómo querés jugar</p>
       </header>
 
       <main class="main">
-        <section class="grid-opciones">
-          <!-- JUGADORES / DTS -->
-          <article class="card card-jugadores" id="bloque-jugadores">
-            <div class="card-content">
-              <h2 class="card-title">Jugadores / DTs</h2>
-              <p class="card-text">
-                Adiviná jugadores y entrenadores de la LUB.
-              </p>
-            </div>
-          </article>
 
-          <!-- CLUBES -->
-          <article class="card card-clubes" id="bloque-clubes">
-            <div class="card-content">
-              <h2 class="card-title">Clubes</h2>
-              <p class="card-text">
-                Adiviná clubes de la Liga Uruguaya.
-              </p>
-            </div>
-          </article>
-        </section>
+        <!-- 🟡 MENÚ PRINCIPAL -->
+        <section id="menu-principal">
+          <h2 class="menu-titulo">Elegí el modo de juego</h2>
 
-        <!-- PANTALLA DE JUEGO -->
-        <section id="pantalla-juego" class="pantalla-juego hidden">
-          <div class="juego-header">
-            <button id="btn-volver" class="btn-volver">← Volver</button>
-            <span id="modo-label" class="modo-label">Modo: -</span>
-            <span id="timer" class="timer">40s</span>
-          </div>
+          <div class="grid-opciones">
+            <article class="card card-menu card-menu-charadas" id="btn-ir-charadas">
+              <div class="card-content">
+                <h2 class="card-title">Charadas LUB</h2>
+                <p class="card-text">Adiviná jugadores, DTs y clubes.</p>
+              </div>
+            </article>
 
-          <div class="palabra-wrapper">
-            <span id="palabra-actual" class="palabra-actual">-</span>
-          </div>
-
-          <div class="score-wrapper">
-            <span class="score-label">Puntaje: </span>
-            <span id="puntaje" class="score-valor">0</span>
-          </div>
-
-          <div class="juego-botones">
-            <button id="btn-correcto" class="btn-primario">Correcto</button>
-            <button id="btn-pasar" class="btn-secundario">Pasar</button>
+            <article class="card card-menu card-menu-subastas" id="btn-ir-subastas">
+              <div class="card-content">
+                <h2 class="card-title">Subastas</h2>
+                <p class="card-text">Gestioná subastas de jugadores.</p>
+              </div>
+            </article>
           </div>
         </section>
+
+        <!-- 🔵 PANTALLA CHARADAS -->
+        <section id="pantalla-charadas" class="hidden">
+
+          <!-- BOTÓN PARA VOLVER AL MENÚ -->
+          <button id="btn-volver-menu" class="btn-volver-menu">← Volver al menú</button>
+
+          <!-- OPCIONES JUGADORES / CLUBES -->
+          <section class="grid-opciones" id="menu-charadas">
+            <article class="card card-jugadores" id="bloque-jugadores">
+              <div class="card-content">
+                <h2 class="card-title">Jugadores / DTs</h2>
+                <p class="card-text">Adiviná jugadores y entrenadores.</p>
+              </div>
+            </article>
+
+            <article class="card card-clubes" id="bloque-clubes">
+              <div class="card-content">
+                <h2 class="card-title">Clubes</h2>
+                <p class="card-text">Adiviná clubes de la LUB.</p>
+              </div>
+            </article>
+          </section>
+
+          <!-- 🔹 PANTALLA DE JUEGO -->
+          <section id="pantalla-juego" class="pantalla-juego hidden">
+            <div class="juego-header">
+              <button id="btn-volver" class="btn-volver">← Volver</button>
+              <span id="modo-label" class="modo-label">Modo: -</span>
+              <span id="timer" class="timer">120s</span>
+            </div>
+
+            <div class="palabra-wrapper">
+              <span id="palabra-actual" class="palabra-actual">-</span>
+            </div>
+
+            <div class="score-wrapper">
+              <span class="score-label">Puntaje:</span>
+              <span id="puntaje" class="score-valor">0</span>
+            </div>
+
+            <div class="juego-botones">
+              <button id="btn-correcto" class="btn-primario">Correcto</button>
+              <button id="btn-pasar" class="btn-secundario">Pasar</button>
+            </div>
+          </section>
+        </section>
+
       </main>
     </div>
 
-    <!-- Carga de datos (personas, clubesLUB) -->
     <script src="datos.js"></script>
-    <!-- Lógica del juego -->
-    <script src="script.js"></script>
+    <script src="charadas.js"></script>
   </body>
 </html>
+
