@@ -46,6 +46,13 @@ body {
   font-size: 15px;
 }
 
+.menu-titulo {
+  text-align: center;
+  margin-bottom: 14px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
 /* ============================
    GRID
 ============================ */
@@ -92,16 +99,14 @@ body {
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.95);
 }
 
-/* efecto al tocar (click / tap) */
 .card:active {
   transform: translateY(-2px) scale(0.97);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
 }
 
 /* ============================
-   CARDS DEL MENÚ PRINCIPAL
+   CARDS MENÚ PRINCIPAL
 ============================ */
-
 .card-menu {
   border-color: rgba(129, 140, 248, 0.9);
 }
@@ -113,10 +118,7 @@ body {
   inset: 0;
   background-repeat: no-repeat;
   background-size: 130%;
-
-  /* 📌 Foto bajada (modificá el porcentaje para ajustar) */
   background-position: center 10%;
-
   opacity: 0.9;
   filter: saturate(1.1);
   z-index: 0;
@@ -124,9 +126,8 @@ body {
 
 .card-menu-charadas::before {
   background-image: url("img/menu-charadas.png");
-  background-size: 130%;  /* más grande para compensar proporción */
-  background-position: center; /* bajada */
-  
+  background-size: 130%;
+  background-position: center;
 }
 
 .card-menu-subastas::before {
@@ -149,9 +150,8 @@ body {
 }
 
 /* ============================
-   CARDS CHARADAS (Jugadores / Clubes)
+   CARDS CHARADAS
 ============================ */
-
 .card-jugadores {
   border-color: rgba(255, 193, 7, 0.9);
 }
@@ -160,7 +160,6 @@ body {
   border-color: rgba(56, 189, 248, 0.9);
 }
 
-/* capa 1: imagen jugador */
 .card-jugadores::before {
   content: "";
   position: absolute;
@@ -174,18 +173,6 @@ body {
   z-index: 0;
 }
 
-/* gradients */
-.card-jugadores::after,
-.card-clubes::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, transparent 0, #000 120%);
-  opacity: 0.55;
-  z-index: 1;
-}
-
-/* clubes imagen */
 .card-clubes::before {
   content: "";
   position: absolute;
@@ -199,8 +186,18 @@ body {
   z-index: 0;
 }
 
+.card-jugadores::after,
+.card-clubes::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 0, #000 120%);
+  opacity: 0.55;
+  z-index: 1;
+}
+
 /* ============================
-   CONTENIDO (TEXTO)
+   TEXTO
 ============================ */
 .card-content {
   position: relative;
@@ -221,17 +218,19 @@ body {
 }
 
 /* ============================
-   PANTALLA DE JUEGO
+   GENERALES
 ============================ */
 .hidden {
   display: none;
 }
 
+/* ============================
+   PANTALLA JUEGO (CHARADAS)
+============================ */
 .pantalla-juego {
   margin-top: 14px;
 }
 
-/* Header de la pantalla de juego */
 .juego-header {
   display: flex;
   align-items: center;
@@ -264,7 +263,6 @@ body {
   color: #facc15;
 }
 
-/* Caja donde aparece la palabra */
 .palabra-wrapper {
   display: flex;
   justify-content: center;
@@ -286,21 +284,18 @@ body {
   text-align: center;
 }
 
-/* Efecto CORRECTO */
 .palabra-wrapper--correcto {
   background: rgba(34, 197, 94, 0.22);
   box-shadow: 0 16px 32px rgba(34, 197, 94, 0.45);
   transform: scale(1.03);
 }
 
-/* Efecto PASAR */
 .palabra-wrapper--pasar {
   background: rgba(248, 113, 113, 0.16);
   box-shadow: 0 16px 32px rgba(248, 113, 113, 0.4);
   transform: scale(0.99);
 }
 
-/* Puntaje */
 .score-wrapper {
   display: flex;
   justify-content: center;
@@ -320,7 +315,6 @@ body {
   color: #facc15;
 }
 
-/* Botones Correcto / Pasar */
 .juego-botones {
   display: flex;
   justify-content: center;
@@ -381,10 +375,7 @@ body {
   box-shadow: 0 5px 12px rgba(30, 64, 175, 0.4);
 }
 
-/* ============================
-   Botón para volver al menú principal
-============================ */
-
+/* Botón volver menú */
 .btn-volver-menu {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -399,5 +390,156 @@ body {
 .btn-volver-menu:hover {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* ============================
+   SUBASTAS
+============================ */
+.subastas-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 6px 0 14px;
+}
+
+.subastas-contador {
+  font-size: 13px;
+  color: #c8c8ff;
+}
+
+.subasta-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.9);
+  margin-bottom: 14px;
+}
+
+.subasta-foto-wrap {
+  width: 100%;
+  height: 240px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.subasta-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.subasta-sin-foto {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  letter-spacing: 1px;
+}
+
+.subasta-nombre {
+  margin-top: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.subasta-club {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #c8c8ff;
+  text-align: center;
+}
+
+.subastas-log {
+  margin-top: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.80);
+  line-height: 1.35;
+}
+/* ============================
+   MODAL COMPRA (Subastas)
+============================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(3px);
+}
+
+.modal-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 32px);
+  max-width: 420px;
+
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.75);
+
+  padding: 16px;
+}
+
+.modal-titulo {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.modal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.modal-label {
+  font-size: 13px;
+  color: #c8c8ff;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: rgba(2, 6, 23, 0.55);
+  color: white;
+  outline: none;
+}
+
+.modal-input:focus {
+  border-color: rgba(191, 219, 254, 0.9);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.20);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* En móviles, que los botones sean más fáciles de tocar */
+@media (max-width: 420px) {
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+
+
 
 

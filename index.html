@@ -22,7 +22,6 @@
       </header>
 
       <main class="main">
-
         <!-- 🟡 MENÚ PRINCIPAL -->
         <section id="menu-principal">
           <h2 class="menu-titulo">Elegí el modo de juego</h2>
@@ -38,7 +37,7 @@
             <article class="card card-menu card-menu-subastas" id="btn-ir-subastas">
               <div class="card-content">
                 <h2 class="card-title">Subastas</h2>
-                <p class="card-text">Gestioná subastas de jugadores.</p>
+                <p class="card-text">Comprá jugadores por rondas.</p>
               </div>
             </article>
           </div>
@@ -46,11 +45,8 @@
 
         <!-- 🔵 PANTALLA CHARADAS -->
         <section id="pantalla-charadas" class="hidden">
-
-          <!-- BOTÓN PARA VOLVER AL MENÚ -->
           <button id="btn-volver-menu" class="btn-volver-menu">← Volver al menú</button>
 
-          <!-- OPCIONES JUGADORES / CLUBES -->
           <section class="grid-opciones" id="menu-charadas">
             <article class="card card-jugadores" id="bloque-jugadores">
               <div class="card-content">
@@ -67,7 +63,6 @@
             </article>
           </section>
 
-          <!-- 🔹 PANTALLA DE JUEGO -->
           <section id="pantalla-juego" class="pantalla-juego hidden">
             <div class="juego-header">
               <button id="btn-volver" class="btn-volver">← Volver</button>
@@ -91,11 +86,99 @@
           </section>
         </section>
 
+        <!-- 🟣 PANTALLA SUBASTAS -->
+        <section id="pantalla-subastas" class="hidden">
+          <button id="btn-volver-menu-subastas" class="btn-volver-menu">← Volver al menú</button>
+
+          <!-- Config -->
+          <section id="config-subastas">
+            <h2 class="menu-titulo">Subastas</h2>
+            <p class="subtitulo">¿Cuántos jugadores son? (1 a 5)</p>
+
+            <div class="juego-botones subastas-botones-cant">
+              <button class="btn-primario" data-cant="1">1</button>
+              <button class="btn-primario" data-cant="2">2</button>
+              <button class="btn-primario" data-cant="3">3</button>
+              <button class="btn-primario" data-cant="4">4</button>
+              <button class="btn-primario" data-cant="5">5</button>
+            </div>
+          </section>
+
+          <!-- Juego -->
+          <section id="juego-subastas" class="hidden">
+            <div class="subastas-top">
+              <h3 id="ronda-label" class="menu-titulo">Ronda 1</h3>
+              <span id="subastas-contador" class="subastas-contador">Jugador 1 / ?</span>
+            </div>
+
+            <div class="subasta-card">
+              <div class="subasta-foto-wrap">
+                <img id="subasta-foto" class="subasta-foto hidden" alt="Foto jugador" />
+                <div id="subasta-sin-foto" class="subasta-sin-foto">SIN FOTO</div>
+              </div>
+
+              <div id="subasta-nombre" class="subasta-nombre">-</div>
+              <div id="subasta-club" class="subasta-club">-</div>
+            </div>
+
+            <div class="juego-botones">
+              <button id="btn-subasta-pasar" class="btn-secundario">Pasar</button>
+              <button id="btn-subasta-comprar" class="btn-primario">Comprar</button>
+            </div>
+
+            <div class="subastas-log" id="subastas-log"></div>
+          </section>
+          <!-- 🧾 MODAL COMPRA (mobile friendly) -->
+<div id="modal-compra" class="modal hidden" aria-hidden="true">
+  <div class="modal-backdrop" id="modal-compra-backdrop"></div>
+
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-compra-titulo">
+    <h3 id="modal-compra-titulo" class="modal-titulo">Comprar jugador</h3>
+
+    <div class="modal-row">
+      <label class="modal-label" for="compra-comprador">¿Quién compra?</label>
+      <select id="compra-comprador" class="modal-input">
+        <option value="1">Jugador 1</option>
+        <option value="2">Jugador 2</option>
+        <option value="3">Jugador 3</option>
+        <option value="4">Jugador 4</option>
+        <option value="5">Jugador 5</option>
+      </select>
+    </div>
+
+    <div class="modal-row">
+      <label class="modal-label" for="compra-monto">Monto final</label>
+      <input
+        id="compra-monto"
+        class="modal-input"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        placeholder="Ej: 1500"
+      />
+    </div>
+
+    <div class="modal-actions">
+      <button id="btn-compra-cancelar" class="btn-secundario">Cancelar</button>
+      <button id="btn-compra-confirmar" class="btn-primario">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+        </section>
       </main>
     </div>
 
+    <!-- IMPORTANTE: orden -->
     <script src="datos.js"></script>
     <script src="charadas.js"></script>
+    <script src="subastas.js"></script>
   </body>
 </html>
+
+
+
+
+
 

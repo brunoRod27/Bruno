@@ -94,7 +94,7 @@ const personas = [
   { nombre: "Xavier Cousté", club: "Goes", rol: "Jugador", deporte: "Basket" },
   { nombre: "Fernando Verrone", club: "Goes", rol: "Jugador", deporte: "Basket" },
   { nombre: "David Nesbitt", club: "Goes", rol: "Jugador", deporte: "Basket" },
-  { nombre: "Sergop Conceicao", club: "Goes", rol: "Jugador", deporte: "Basket" },
+  { nombre: "Sergio Conceicao", club: "Goes", rol: "Jugador", deporte: "Basket" },
 
   // HEBRAICA MACABI
   { nombre: "Manuel Mayora", club: "Hebraica Macabi", rol: "Jugador", deporte: "Basket" },
@@ -199,7 +199,7 @@ const personas = [
     { nombre: "Nicolás Casalanguida", club: "Argentina", deporte: "Basket", rol: "DT" },
     { nombre: "Marcelo Signorelli", club: "Uruguay", deporte: "Basket", rol: "DT" },
     { nombre: "Leandro Quiñones", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
-     { nombre: "Nicolás Borselino", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
-
+    { nombre: "Nicolás Borselino", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
+    { nombre: "Miguel Simón", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
           
 ];
