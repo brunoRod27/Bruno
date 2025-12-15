@@ -417,7 +417,7 @@ body {
 
 .subasta-foto-wrap {
   width: 100%;
-  height: 240px;
+  height: 200px;
   border-radius: 14px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.25);
@@ -426,12 +426,13 @@ body {
   justify-content: center;
 }
 
-.subasta-foto {
+.subasta-foto{
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  object-position: center 20%;
 }
+
 
 .subasta-sin-foto {
   font-size: 14px;
@@ -536,6 +537,11 @@ body {
   .modal-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+@media (max-width: 480px){
+  .subasta-foto-wrap{
+    height: 180px;
   }
 }
 
