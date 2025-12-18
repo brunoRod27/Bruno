@@ -276,11 +276,11 @@ const btnEquipoAnterior = document.getElementById("btn-equipo-anterior");
 const btnEquipoSiguiente = document.getElementById("btn-equipo-siguiente");
 
 const POSICIONES = [
-  { id: "base",      label: "Base",      x: 28, y: 55 },
-  { id: "escolta",   label: "Escolta",   x: 40, y: 35 },
-  { id: "alero",     label: "Alero",     x: 55, y: 30 },
-  { id: "alapivot",  label: "Ala-Pívot", x: 62, y: 48 },
-  { id: "pivot",     label: "Pívot",     x: 70, y: 63 },
+  { id: "base",      label: "Base",      x: 75, y: 45 },
+  { id: "escolta",   label: "Escolta",   x: 25, y: 15 },
+  { id: "alero",     label: "Alero",     x: 25, y: 88 },
+  { id: "alapivot",  label: "Ala-Pívot", x: 45, y: 35 },
+  { id: "pivot",     label: "Pívot",     x: 30, y: 58 },
 ];
 
 let equipoJugadorActual = 1;
@@ -314,13 +314,105 @@ function crearBubbleEquipo(jugador, slot){
     img.src = "img/jugadores.png"; // fallback
   };
 
-  setPosPercent(el, slot.x, slot.y);
+  // posición inicial por slot
+  el.dataset.slot = slot.id;
+  el.style.left = slot.x + "%";
+  el.style.top  = slot.y + "%";
 
-  // (Opcional) acá después metemos drag & swap, si querés.
   return el;
 }
 
-// Devuelve array de personas compradas por ese comprador (en orden de compra)
+function habilitarDragSnapSwapVisor() {
+  if (!cancha) return;
+
+  const slotMap = {};
+  POSICIONES.forEach(p => slotMap[p.id] = p);
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+  function snapToSlot(el, slotId) {
+    const s = slotMap[slotId];
+    if (!s) return;
+
+    el.dataset.slot = slotId;
+    el.style.left = s.x + "%";
+    el.style.top  = s.y + "%";
+
+    const posLabel = el.querySelector(".ppos");
+    if (posLabel) posLabel.textContent = s.label;
+  }
+
+  function distanciaPct(x1, y1, x2, y2) {
+    const dx = x1 - x2;
+    const dy = y1 - y2;
+    return dx * dx + dy * dy;
+  }
+
+  function slotMasCercano(xPct, yPct) {
+    let mejor = POSICIONES[0];
+    let mejorDist = Infinity;
+
+    for (const s of POSICIONES) {
+      const d = distanciaPct(xPct, yPct, s.x, s.y);
+      if (d < mejorDist) {
+        mejorDist = d;
+        mejor = s;
+      }
+    }
+    return mejor;
+  }
+
+  cancha.querySelectorAll(".player-bubble").forEach(el => {
+    el.style.touchAction = "none";
+
+    el.addEventListener("pointerdown", e => {
+      e.preventDefault();
+      el.setPointerCapture(e.pointerId);
+      el.classList.add("dragging");
+    });
+
+    el.addEventListener("pointermove", e => {
+      if (!el.classList.contains("dragging")) return;
+
+      const rect = cancha.getBoundingClientRect();
+      const halfW = el.offsetWidth / 2;
+      const halfH = el.offsetHeight / 2;
+
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
+
+      x = clamp(x, halfW, rect.width - halfW);
+      y = clamp(y, halfH, rect.height - halfH);
+
+      el.style.left = (x / rect.width) * 100 + "%";
+      el.style.top  = (y / rect.height) * 100 + "%";
+    });
+
+    el.addEventListener("pointerup", e => {
+      if (!el.classList.contains("dragging")) return;
+
+      const xPct = parseFloat(el.style.left);
+      const yPct = parseFloat(el.style.top);
+
+      const destino = slotMasCercano(xPct, yPct);
+      const origenId = el.dataset.slot;
+
+      const otro = Array.from(cancha.querySelectorAll(".player-bubble"))
+        .find(o => o !== el && o.dataset.slot === destino.id);
+
+      if (otro) snapToSlot(otro, origenId);
+      snapToSlot(el, destino.id);
+
+      el.classList.remove("dragging");
+      el.releasePointerCapture(e.pointerId);
+    });
+
+    el.addEventListener("pointercancel", () => {
+      el.classList.remove("dragging");
+    });
+  });
+}
+
 function getEquipoPorComprador(n){
   return subastas.compras
     .filter(c => c.comprador === n)
@@ -329,43 +421,48 @@ function getEquipoPorComprador(n){
 }
 
 function renderCanchaParaComprador(n){
-  if (!visorEquipos || !cancha) return;
+  if (!visorEquipos || !cancha || !equipoTitulo) {
+    console.error("Faltan elementos del visor en el HTML:", { visorEquipos, cancha, equipoTitulo });
+    return;
+  }
 
   equipoTitulo.textContent = `Equipo — Jugador ${n}`;
   cancha.innerHTML = "";
-  bubbles = [];
 
   const equipo = getEquipoPorComprador(n);
 
-  for (let i=0; i<5; i++){
+  for (let i = 0; i < 5; i++){
     const slot = POSICIONES[i];
     const jugador = equipo[i];
-
-    if (!jugador) {
-      // si falta jugador, no dibujamos bubble (queda vacío ese puesto)
-      continue;
-    }
+    if (!jugador) continue;
 
     const el = crearBubbleEquipo(jugador, slot);
     cancha.appendChild(el);
-    bubbles.push({ el, slotId: slot.id, jugador });
   }
 
-  // habilitar/deshabilitar nav
-  btnEquipoAnterior.disabled = (n <= 1);
-  btnEquipoSiguiente.disabled = (n >= subastas.cantJugadores);
+  if (btnEquipoAnterior) btnEquipoAnterior.disabled = (n <= 1);
+  if (btnEquipoSiguiente) btnEquipoSiguiente.disabled = (n >= subastas.cantJugadores);
+
+  habilitarDragSnapSwapVisor();
 }
 
 function mostrarVisorEquipos(){
-  // ocultar juego subastas (la card FIN, botones pasar/comprar, etc)
+  // oculto el juego y muestro visor
   if (sub_juegoSubastas) sub_juegoSubastas.classList.add("hidden");
-  if (visorEquipos) visorEquipos.classList.remove("hidden");
+  if (sub_configSubastas) sub_configSubastas.classList.add("hidden");
+
+  if (!visorEquipos) {
+    console.error("No existe #visor-equipos en el HTML");
+    return;
+  }
+
+  visorEquipos.classList.remove("hidden");
 
   equipoJugadorActual = 1;
   renderCanchaParaComprador(equipoJugadorActual);
 }
 
-// nav
+// nav visor
 if (btnEquipoAnterior){
   btnEquipoAnterior.addEventListener("click", () => {
     if (equipoJugadorActual <= 1) return;
@@ -381,6 +478,9 @@ if (btnEquipoSiguiente){
     renderCanchaParaComprador(equipoJugadorActual);
   });
 }
+
+
+
 
 
 

@@ -130,18 +130,16 @@
             <div class="subastas-log" id="subastas-log"></div>
           </section>
           <!-- 🟤 VISOR DE EQUIPOS (canchita por jugador) -->
-<section id="visor-equipos" class="hidden">
-  <div class="subastas-top">
-    <h3 id="equipo-titulo" class="menu-titulo">Equipo — Jugador 1</h3>
-
-    <div style="display:flex; gap:8px; align-items:center;">
-      <button id="btn-equipo-anterior" class="btn-secundario">Anterior</button>
-      <button id="btn-equipo-siguiente" class="btn-primario">Siguiente</button>
-    </div>
+<div id="visor-equipos" class="hidden">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <button id="btn-equipo-anterior" class="btn-secundario">Anterior</button>
+    <div id="equipo-titulo" style="font-weight:700;"></div>
+    <button id="btn-equipo-siguiente" class="btn-secundario">Siguiente</button>
   </div>
 
   <div id="cancha" class="cancha"></div>
-</section>
+</div>
+
 
           <!-- 🧾 MODAL COMPRA (mobile friendly) -->
 <div id="modal-compra" class="modal hidden" aria-hidden="true">
@@ -184,6 +182,7 @@
         </section>
       </main>
     </div>
+    
 
     <!-- IMPORTANTE: orden -->
     <script src="datos.js"></script>

@@ -545,61 +545,101 @@ body {
   }
 }
 
+/* ============================
+   CANCHA + BURBUJAS (EQUIPO)
+============================ */
 .cancha{
   width: 100%;
   max-width: 520px;
   aspect-ratio: 1 / 1;
   margin: 14px auto 0;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   position: relative;
   background: url("img/cancha.png") center/cover no-repeat;
   box-shadow: 0 14px 40px rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.10);
+
+  /* importante para drag móvil */
   touch-action: none;
 }
 
+/* Esta es la “card” del jugador sobre la cancha */
 .player-bubble{
-  position:absolute;
-  width: 92px;
-  height: 112px;
-  border-radius: 16px;
+  position: absolute;
+
+  .player-bubble{
+  width: 84px;   /* ⬅ antes 92 */
+  height: 112px; /* ⬅ antes 122 */
+ }
+
+  border-radius: 18px;
   background: rgba(15, 23, 42, 0.92);
   border: 1px solid rgba(255,255,255,0.14);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.45);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding: 8px;
+  box-shadow: 0 14px 26px rgba(0,0,0,0.55);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 10px 8px;
+
   user-select: none;
+  -webkit-user-select: none;
   touch-action: none;
+
+  /* para que se “sientan” como cartas */
+  backdrop-filter: blur(2px);
+   transform: translate(-50%, -50%);
+  cursor: grab;
 }
 
+.player-bubble:active{ cursor: grabbing; }
+
+.player-bubble.dragging{
+  z-index: 9999;
+  transform: scale(1.03);
+  opacity: 0.98;
+}
+
+/* Foto como en tu ejemplo (más grande y con cara visible) */
 .player-bubble img{
   width: 100%;
-  height: 70px;
-  border-radius: 12px;
-  object-fit: contain;      /* ✅ evita cabezas cortadas */
+  height: 62px;
+  border-radius: 14px;
+
+  /* esto suele evitar cabezas cortadas */
+  object-fit: cover;
+  object-position: center 18%;
+
   background: rgba(0,0,0,0.20);
 }
 
+/* Nombre */
 .player-bubble .pname{
-  margin-top: 6px;
-  font-size: 11px;
-  line-height: 1.1;
-  text-align:center;
-  font-weight: 700;
+  margin-top: 8px;
+  font-size: 10px;
+  line-height: 1.05;
+  text-align: center;
+  font-weight: 800;
 }
 
+/* Posición */
 .player-bubble .ppos{
-  margin-top: 3px;
-  font-size: 10px;
+  margin-top: 4px;
+  font-size: 9px;
   color: rgba(200,200,255,0.9);
 }
 
+/* Mobile: un toque más chico para que entren mejor */
 @media (max-width: 420px){
-  .player-bubble{ width: 82px; height: 104px; }
-  .player-bubble img{ height: 64px; }
+  .player-bubble{
+    width: 76px;
+    height: 104px;
+  }
+
+  .player-bubble img{
+    height: 58px;
+  }
 }
 
 
