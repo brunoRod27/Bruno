@@ -195,3 +195,8 @@ const personas = [
     { nombre: "David Doblas", club: "Extranjero", deporte: "Basket", rol: "Leyenda"}
 
 ];
+// ✅ precios base (por ahora todos 1)
+personas.forEach(p => {
+  p.precioBase = 1;
+});
+
