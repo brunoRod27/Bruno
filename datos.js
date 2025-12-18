@@ -62,11 +62,10 @@ const personas = [
   { nombre: "Agustín Zuvich", club: "Aguada", deporte: "Basket", rol: "Jugador" },
   { nombre: "Donald Sims", club: "Aguada", deporte: "Basket", rol: "Extranjero" },
   { nombre: "Earl Clark", club: "Aguada", deporte: "Basket", rol: "Extranjero" },
-  { nombre: "Egidijus Mockevicius", club: "Aguada", deporte: "Basket", rol: "Extranjero" },
+  { nombre: "Luis Santos", club: "Aguada", deporte: "Basket", rol: "Extranjero" },
   { nombre: "Joaquín Rodríguez", club: "Aguada", deporte: "Basket", rol: "Sub23" },
   { nombre: "Agustín Gentile", club: "Aguada", deporte: "Basket", rol: "Sub23" },
   { nombre: "Manuel Fernández", club: "Aguada", deporte: "Basket", rol: "Sub23" },
-  { nombre: "Germán Cortizas", club: "Aguada", deporte: "Basket", rol: "DT" },
   // BIGUÁ
   { nombre: "Brian García", club: "Biguá", rol: "Jugador", deporte: "Basket" },
   { nombre: "Nicolás Catalá", club: "Biguá", rol: "Jugador", deporte: "Basket" },
@@ -87,14 +86,14 @@ const personas = [
   { nombre: "Mateo Bianchi", club: "Defensor Sporting", rol: "Jugador", deporte: "Basket" },
   { nombre: "Dion Wright", club: "Defensor Sporting", rol: "Extranjero", deporte: "Basket" },
   { nombre: "Nestor Colmenares", club: "Defensor Sporting", rol: "Extranjero", deporte: "Basket" },
-  { nombre: "Gonzalo Brea", club: "Defensor Sporting", rol: "DT", deporte: "Basket" },
+  { nombre: "Elijah Weaver", club: "Defensor Sporting", rol: "Extranjero", deporte: "Basket" },
 
   // GOES
   { nombre: "Emiliano Bonet", club: "Goes", rol: "Jugador", deporte: "Basket" },
   { nombre: "Xavier Cousté", club: "Goes", rol: "Jugador", deporte: "Basket" },
   { nombre: "Fernando Verrone", club: "Goes", rol: "Jugador", deporte: "Basket" },
-  { nombre: "David Nesbitt", club: "Goes", rol: "Jugador", deporte: "Basket" },
-  { nombre: "Sergio Conceicao", club: "Goes", rol: "Jugador", deporte: "Basket" },
+  { nombre: "David Nesbitt", club: "Extranjero", rol: "Jugador", deporte: "Basket" },
+  { nombre: "Sergio Conceicao", club: "Extranjero", rol: "Jugador", deporte: "Basket" },
 
   // HEBRAICA MACABI
   { nombre: "Manuel Mayora", club: "Hebraica Macabi", rol: "Jugador", deporte: "Basket" },
@@ -103,7 +102,6 @@ const personas = [
   { nombre: "Ignacio Xavier", club: "Hebraica Macabi", rol: "Jugador", deporte: "Basket" },
   { nombre: "Federico Haller", club: "Hebraica Macabi", rol: "Jugador", deporte: "Basket" },
   { nombre: "Andre Nation", club: "Hebraica Macabi", rol: "Extranjero", deporte: "Basket" },
-  { nombre: "Leonardo Zylbersztein", club: "Hebraica Macabi", rol: "DT", deporte: "Basket" },
 
   // MALVÍN
   { nombre: "Manuel Romero", club: "Malvín", rol: "Jugador", deporte: "Basket" },
@@ -112,7 +110,6 @@ const personas = [
   { nombre: "Remy Abell", club: "Malvín", rol: "Extranjero", deporte: "Basket" },
   { nombre: "Dragan Zekovic", club: "Malvín", rol: "Extranjero", deporte: "Basket" },
   { nombre: "Nicolás Martínez", club: "Malvín", rol: "Sub23", deporte: "Basket" },
-  { nombre: "Pablo López", club: "Malvín", rol: "DT", deporte: "Basket" },
 
   // NACIONAL
   { nombre: "Luciano Parodi", club: "Nacional", rol: "Jugador", deporte: "Basket" },
@@ -123,7 +120,6 @@ const personas = [
   { nombre: "James Feldeine", club: "Nacional", rol: "Extranjero", deporte: "Basket" },
   { nombre: "Connor Zinaich", club: "Nacional", rol: "Extranjero", deporte: "Basket" },
   { nombre: "Ernesto Oglivie", club: "Nacional", rol: "Extranjero", deporte: "Basket" },
-  { nombre: "Álvaro Ponce", club: "Nacional", rol: "DT", deporte: "Basket" },
 
   // PEÑAROL
   { nombre: "Federico Bavosi", club: "Peñarol", rol: "Jugador", deporte: "Basket" },
@@ -132,14 +128,12 @@ const personas = [
   { nombre: "Emiliano Serres", club: "Peñarol", rol: "Jugador", deporte: "Basket" },
   { nombre: "Martín Rojas", club: "Peñarol", rol: "Jugador", deporte: "Basket" },
   { nombre: "Skyler Hogan", club: "Peñarol", rol: "Extranjero", deporte: "Basket" },
-  { nombre: "Greg Whittington", club: "Peñarol", rol: "Extranjero", deporte: "Basket" },
+  { nombre: "Eric Romero", club: "Peñarol", rol: "Extranjero", deporte: "Basket" },
   { nombre: "Andrés Ibargüen", club: "Peñarol", rol: "Extranjero", deporte: "Basket" },
   { nombre: "Santiago Calimares", club: "Peñarol", rol: "Sub23", deporte: "Basket" },
   { nombre: "Nicolás Lema", club: "Peñarol", rol: "Sub23", deporte: "Basket" },
-  { nombre: "Leandro García Morales", club: "Peñarol", rol: "DT", deporte: "Basket" },
 
   // UNIÓN ATLÉTICA
-  { nombre: "Iván Loriente", club: "Unión Atlética", rol: "Jugador", deporte: "Basket" },
   { nombre: "Juan Ignacio Ducasse", club: "Unión Atlética", rol: "Jugador", deporte: "Basket" },
 
   // URUNDAY
@@ -153,7 +147,6 @@ const personas = [
   { nombre: "Santiago Moglia", club: "Welcome", rol: "Jugador", deporte: "Basket" },
   { nombre: "Diego Pena García", club: "Welcome", rol: "Jugador", deporte: "Basket" },
   { nombre: "Ignacio Stoll", club: "Welcome", rol: "Sub23", deporte: "Basket" },
-  { nombre: "Diego Rivas", club: "Welcome", rol: "DT", deporte: "Basket" },
 
     { nombre: "Nicolás Mazzarino", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Joaquín Izuibejeres", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
@@ -165,10 +158,10 @@ const personas = [
     { nombre: "Mauricio Aguiar", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Martín Osimani", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Diego García", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
-    { nombre: "Javier Espindola", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Miguel Barriola", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Alejandro Muro", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Pablo Ivon", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
+    { nombre: "Iván Loriente", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Pablo Morales", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Rodrigo Trelles", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Gerardo Fernandez", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
@@ -181,25 +174,24 @@ const personas = [
     { nombre: "Kyle Lamonte", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Al Thornton", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Jamil Wilson", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
-    { nombre: "Luis Santos", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
+    { nombre: "Egidijus Mockevicius", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Raphiael Putney", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Michael Sweetney", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Jeremis Smith", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Greg Dilligard", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Hatila Passos", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Zack Graham", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
-    { nombre: "Anthony Dandrige", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
-    { nombre: "Pablo Macansakas", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
+    { nombre: "Anthony Dandridge", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
+    { nombre: "Pablo Macanskas", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Eloy Vargas", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Dwayne Curtis", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Maozinha", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Jason Granger", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
-    { nombre: "Miguel Vólcan", club: "Uruguay", deporte: "Basket", rol: "DT" },
-    { nombre: "Adrian Capelli", club: "Argentina", deporte: "Basket", rol: "DT" },
-    { nombre: "Nicolás Casalanguida", club: "Argentina", deporte: "Basket", rol: "DT" },
-    { nombre: "Marcelo Signorelli", club: "Uruguay", deporte: "Basket", rol: "DT" },
     { nombre: "Leandro Quiñones", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Nicolás Borselino", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
     { nombre: "Miguel Simón", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
-          
+    { nombre: "Leandro Garcia Morales", club: "Uruguay", deporte: "Basket", rol: "Leyenda"},
+    { nombre: "Larry Bacon", club: "Extranjero", deporte: "Basket", rol: "Leyenda"},
+    { nombre: "David Doblas", club: "Extranjero", deporte: "Basket", rol: "Leyenda"}
+
 ];

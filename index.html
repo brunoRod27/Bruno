@@ -102,6 +102,7 @@
               <button class="btn-primario" data-cant="4">4</button>
               <button class="btn-primario" data-cant="5">5</button>
             </div>
+            
           </section>
 
           <!-- Juego -->
@@ -128,6 +129,20 @@
 
             <div class="subastas-log" id="subastas-log"></div>
           </section>
+          <!-- 🟤 VISOR DE EQUIPOS (canchita por jugador) -->
+<section id="visor-equipos" class="hidden">
+  <div class="subastas-top">
+    <h3 id="equipo-titulo" class="menu-titulo">Equipo — Jugador 1</h3>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button id="btn-equipo-anterior" class="btn-secundario">Anterior</button>
+      <button id="btn-equipo-siguiente" class="btn-primario">Siguiente</button>
+    </div>
+  </div>
+
+  <div id="cancha" class="cancha"></div>
+</section>
+
           <!-- 🧾 MODAL COMPRA (mobile friendly) -->
 <div id="modal-compra" class="modal hidden" aria-hidden="true">
   <div class="modal-backdrop" id="modal-compra-backdrop"></div>

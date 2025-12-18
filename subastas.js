@@ -6,11 +6,12 @@ const subastas = {
   ronda: 1,
   idxEnRonda: 0,
   ordenRonda: [],
-  compras: [] // {ronda, persona, monto, comprador}
+  compras: [],                 // { ronda, persona, comprador, monto }
+  compradoresRonda: {}         // { [ronda]: Set() }
 };
 
 // ==============================
-// DOM (prefijo sub_ para no chocar con charadas.js)
+// DOM
 // ==============================
 const sub_btnIrSubastas = document.getElementById("btn-ir-subastas");
 const sub_pantallaSubastas = document.getElementById("pantalla-subastas");
@@ -37,7 +38,7 @@ const sub_menuPrincipal = document.getElementById("menu-principal");
 const sub_pantallaCharadas = document.getElementById("pantalla-charadas");
 
 // ==============================
-// MODAL COMPRA (nuevo)
+// MODAL COMPRA
 // ==============================
 const sub_modalCompra = document.getElementById("modal-compra");
 const sub_modalBackdrop = document.getElementById("modal-compra-backdrop");
@@ -65,77 +66,63 @@ function sub_mezclar(arr) {
 }
 
 function sub_setSelectCompradores(cant) {
-  if (!sub_selectComprador) return;
-
   sub_selectComprador.innerHTML = "";
   for (let i = 1; i <= cant; i++) {
     const opt = document.createElement("option");
-    opt.value = String(i);
+    opt.value = i;
     opt.textContent = `Jugador ${i}`;
     sub_selectComprador.appendChild(opt);
   }
 }
 
+// ==============================
+// Modal
+// ==============================
 function sub_abrirModalCompra() {
-  if (!sub_modalCompra) return;
-
   sub_inputMonto.value = "";
   sub_modalCompra.classList.remove("hidden");
-  sub_modalCompra.setAttribute("aria-hidden", "false");
-
-  // enfocar para que salga teclado numérico en móvil
-  setTimeout(() => {
-    sub_inputMonto.focus();
-  }, 50);
+  setTimeout(() => sub_inputMonto.focus(), 50);
 }
 
 function sub_cerrarModalCompra() {
-  if (!sub_modalCompra) return;
-
   sub_modalCompra.classList.add("hidden");
-  sub_modalCompra.setAttribute("aria-hidden", "true");
 }
 
 // ==============================
-// Flujo juego
+// Flujo de juego
 // ==============================
 function sub_iniciarRonda() {
   sub_rondaLabel.textContent = `Ronda ${subastas.ronda}`;
 
   subastas.idxEnRonda = 0;
-  subastas.ordenRonda = sub_mezclar(personas); // personas viene de datos.js
+  subastas.ordenRonda = sub_mezclar(personas);
+
+  if (!subastas.compradoresRonda[subastas.ronda]) {
+    subastas.compradoresRonda[subastas.ronda] = new Set();
+  }
 
   sub_mostrarActual();
 }
 
 function sub_mostrarActual() {
   const total = subastas.ordenRonda.length;
-  const i = subastas.idxEnRonda;
 
-  if (i >= total) {
-    subastas.ronda++;
-    if (subastas.ronda > 5) {
-      sub_finalizarSubastas();
-      return;
-    }
-    sub_iniciarRonda();
-    return;
+  if (subastas.idxEnRonda >= total) {
+    subastas.idxEnRonda = 0;
   }
 
-  const persona = subastas.ordenRonda[i];
-  sub_contadorSpan.textContent = `Jugador ${i + 1} / ${total}`;
+  const persona = subastas.ordenRonda[subastas.idxEnRonda];
 
+  sub_contadorSpan.textContent = `Jugador ${subastas.idxEnRonda + 1} / ${total}`;
   sub_subastaNombre.textContent = persona.nombre;
-  sub_subastaClub.textContent = persona.club ? persona.club : "-";
+  sub_subastaClub.textContent = persona.club || "-";
 
   const src = sub_rutaFotoPersona(persona);
-
   sub_subastaFoto.classList.remove("hidden");
   sub_subastaSinFoto.classList.add("hidden");
   sub_subastaFoto.src = src;
 
   sub_subastaFoto.onerror = () => {
-    sub_subastaFoto.onerror = null;
     sub_subastaFoto.classList.add("hidden");
     sub_subastaSinFoto.classList.remove("hidden");
     sub_subastaSinFoto.textContent = "SIN FOTO";
@@ -147,23 +134,16 @@ function sub_pasarSiguiente() {
   sub_mostrarActual();
 }
 
-// antes era prompt(), ahora abrimos modal
 function sub_comprarActual() {
-  const persona = subastas.ordenRonda[subastas.idxEnRonda];
-  if (!persona) return;
-  if (subastas.cantJugadores <= 0) return;
-
   sub_abrirModalCompra();
 }
 
 function sub_confirmarCompraDesdeModal() {
   const persona = subastas.ordenRonda[subastas.idxEnRonda];
-  if (!persona) return;
-
   const comprador = Number(sub_selectComprador.value);
   const monto = Number(String(sub_inputMonto.value).replace(",", "."));
 
-  if (!Number.isFinite(comprador) || comprador < 1 || comprador > subastas.cantJugadores) {
+  if (!Number.isInteger(comprador) || comprador < 1 || comprador > subastas.cantJugadores) {
     alert("Comprador inválido.");
     return;
   }
@@ -172,6 +152,15 @@ function sub_confirmarCompraDesdeModal() {
     alert("Monto inválido.");
     return;
   }
+
+  const setRonda = subastas.compradoresRonda[subastas.ronda];
+
+  if (setRonda.has(comprador)) {
+    alert(`El Jugador ${comprador} ya compró en esta ronda.`);
+    return;
+  }
+
+  setRonda.add(comprador);
 
   subastas.compras.push({
     ronda: subastas.ronda,
@@ -182,12 +171,22 @@ function sub_confirmarCompraDesdeModal() {
 
   sub_renderLog();
   sub_cerrarModalCompra();
+
+  // si ya compraron todos → siguiente ronda
+  if (setRonda.size >= subastas.cantJugadores) {
+    subastas.ronda++;
+    if (subastas.ronda > 5) {
+      sub_finalizarSubastas();
+      return;
+    }
+    sub_iniciarRonda();
+    return;
+  }
+
   sub_pasarSiguiente();
 }
 
 function sub_renderLog() {
-  if (!sub_subastasLog) return;
-
   if (subastas.compras.length === 0) {
     sub_subastasLog.textContent = "";
     return;
@@ -196,66 +195,55 @@ function sub_renderLog() {
   const ultimas = subastas.compras.slice(-6).reverse();
   sub_subastasLog.innerHTML =
     `<div style="margin-bottom:6px;font-weight:700;">Últimas compras:</div>` +
-    ultimas
-      .map(c => `• R${c.ronda}: ${c.persona.nombre} — Jugador ${c.comprador} — $${c.monto}`)
-      .join("<br/>");
+    ultimas.map(c =>
+      `• R${c.ronda}: ${c.persona.nombre} — Jugador ${c.comprador} — $${c.monto}`
+    ).join("<br/>");
 }
 
 function sub_finalizarSubastas() {
   sub_rondaLabel.textContent = "Subastas finalizadas";
   sub_contadorSpan.textContent = "";
 
-  sub_subastaNombre.textContent = "-";
-  sub_subastaClub.textContent = "-";
-  sub_subastaFoto.classList.add("hidden");
-  sub_subastaSinFoto.classList.remove("hidden");
-  sub_subastaSinFoto.textContent = "FIN";
-
-  sub_btnPasar.disabled = true;
-  sub_btnComprar.disabled = true;
-
-  sub_renderLog();
+  // en vez de mostrar FIN, mostramos canchitas
+  mostrarVisorEquipos();
 }
+
 
 // ==============================
-// Navegación (ENTRAR / SALIR)
+// Navegación
 // ==============================
-if (sub_btnIrSubastas) {
-  sub_btnIrSubastas.addEventListener("click", () => {
-    if (sub_menuPrincipal) sub_menuPrincipal.classList.add("hidden");
-    if (sub_pantallaCharadas) sub_pantallaCharadas.classList.add("hidden");
-    if (sub_pantallaSubastas) sub_pantallaSubastas.classList.remove("hidden");
+sub_btnIrSubastas.addEventListener("click", () => {
+  sub_menuPrincipal.classList.add("hidden");
+  sub_pantallaCharadas.classList.add("hidden");
+  sub_pantallaSubastas.classList.remove("hidden");
 
-    // al entrar: mostrar config
-    if (sub_configSubastas) sub_configSubastas.classList.remove("hidden");
-    if (sub_juegoSubastas) sub_juegoSubastas.classList.add("hidden");
-  });
-}
+  sub_configSubastas.classList.remove("hidden");
+  sub_juegoSubastas.classList.add("hidden");
+});
 
-if (sub_btnVolverMenuSubastas) {
-  sub_btnVolverMenuSubastas.addEventListener("click", () => {
-    if (sub_pantallaSubastas) sub_pantallaSubastas.classList.add("hidden");
-    if (sub_menuPrincipal) sub_menuPrincipal.classList.remove("hidden");
-  });
-}
+sub_btnVolverMenuSubastas.addEventListener("click", () => {
+  sub_pantallaSubastas.classList.add("hidden");
+  sub_menuPrincipal.classList.remove("hidden");
+});
 
 // ==============================
 // Config cantidad jugadores
 // ==============================
-document.querySelectorAll("#config-subastas .btn-primario").forEach((btn) => {
+document.querySelectorAll("#config-subastas .btn-primario").forEach(btn => {
   btn.addEventListener("click", () => {
     subastas.cantJugadores = Number(btn.dataset.cant);
+
+    subastas.ronda = 1;
+    subastas.compras = [];
+    subastas.compradoresRonda = {};
+
+    sub_setSelectCompradores(subastas.cantJugadores);
 
     sub_configSubastas.classList.add("hidden");
     sub_juegoSubastas.classList.remove("hidden");
 
-    subastas.ronda = 1;
-    subastas.compras = [];
-
     sub_btnPasar.disabled = false;
     sub_btnComprar.disabled = false;
-
-    sub_setSelectCompradores(subastas.cantJugadores);
 
     sub_renderLog();
     sub_iniciarRonda();
@@ -263,31 +251,137 @@ document.querySelectorAll("#config-subastas .btn-primario").forEach((btn) => {
 });
 
 // ==============================
-// Botones juego
+// Botones
 // ==============================
-if (sub_btnPasar) sub_btnPasar.addEventListener("click", sub_pasarSiguiente);
-if (sub_btnComprar) sub_btnComprar.addEventListener("click", sub_comprarActual);
+sub_btnPasar.addEventListener("click", sub_pasarSiguiente);
+sub_btnComprar.addEventListener("click", sub_comprarActual);
+
+sub_btnCancelarCompra.addEventListener("click", sub_cerrarModalCompra);
+sub_modalBackdrop.addEventListener("click", sub_cerrarModalCompra);
+sub_btnConfirmarCompra.addEventListener("click", sub_confirmarCompraDesdeModal);
+
+sub_inputMonto.addEventListener("keydown", e => {
+  if (e.key === "Enter") sub_confirmarCompraDesdeModal();
+  if (e.key === "Escape") sub_cerrarModalCompra();
+});
 
 // ==============================
-// Modal eventos
+// VISOR DE EQUIPOS (canchita por jugador)
 // ==============================
-if (sub_modalBackdrop) sub_modalBackdrop.addEventListener("click", sub_cerrarModalCompra);
-if (sub_btnCancelarCompra) sub_btnCancelarCompra.addEventListener("click", sub_cerrarModalCompra);
-if (sub_btnConfirmarCompra) sub_btnConfirmarCompra.addEventListener("click", sub_confirmarCompraDesdeModal);
 
-// Enter para confirmar (cómodo en PC)
-if (sub_inputMonto) {
-  sub_inputMonto.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      sub_confirmarCompraDesdeModal();
+const visorEquipos = document.getElementById("visor-equipos");
+const cancha = document.getElementById("cancha");
+const equipoTitulo = document.getElementById("equipo-titulo");
+const btnEquipoAnterior = document.getElementById("btn-equipo-anterior");
+const btnEquipoSiguiente = document.getElementById("btn-equipo-siguiente");
+
+const POSICIONES = [
+  { id: "base",      label: "Base",      x: 28, y: 55 },
+  { id: "escolta",   label: "Escolta",   x: 40, y: 35 },
+  { id: "alero",     label: "Alero",     x: 55, y: 30 },
+  { id: "alapivot",  label: "Ala-Pívot", x: 62, y: 48 },
+  { id: "pivot",     label: "Pívot",     x: 70, y: 63 },
+];
+
+let equipoJugadorActual = 1;
+let bubbles = []; // [{el, slotId, jugador}]
+
+function sub_slug(nombre) {
+  return nombre
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-");
+}
+
+function setPosPercent(el, xPct, yPct){
+  el.style.left = xPct + "%";
+  el.style.top  = yPct + "%";
+}
+
+function crearBubbleEquipo(jugador, slot){
+  const el = document.createElement("div");
+  el.className = "player-bubble";
+  el.innerHTML = `
+    <img alt="${jugador.nombre}" />
+    <div class="pname">${jugador.nombre}</div>
+    <div class="ppos">${slot.label}</div>
+  `;
+
+  const img = el.querySelector("img");
+  img.src = `img/${sub_slug(jugador.nombre)}.png`;
+  img.onerror = () => {
+    img.onerror = null;
+    img.src = "img/jugadores.png"; // fallback
+  };
+
+  setPosPercent(el, slot.x, slot.y);
+
+  // (Opcional) acá después metemos drag & swap, si querés.
+  return el;
+}
+
+// Devuelve array de personas compradas por ese comprador (en orden de compra)
+function getEquipoPorComprador(n){
+  return subastas.compras
+    .filter(c => c.comprador === n)
+    .map(c => c.persona)
+    .slice(0, 5);
+}
+
+function renderCanchaParaComprador(n){
+  if (!visorEquipos || !cancha) return;
+
+  equipoTitulo.textContent = `Equipo — Jugador ${n}`;
+  cancha.innerHTML = "";
+  bubbles = [];
+
+  const equipo = getEquipoPorComprador(n);
+
+  for (let i=0; i<5; i++){
+    const slot = POSICIONES[i];
+    const jugador = equipo[i];
+
+    if (!jugador) {
+      // si falta jugador, no dibujamos bubble (queda vacío ese puesto)
+      continue;
     }
-    if (e.key === "Escape") {
-      e.preventDefault();
-      sub_cerrarModalCompra();
-    }
+
+    const el = crearBubbleEquipo(jugador, slot);
+    cancha.appendChild(el);
+    bubbles.push({ el, slotId: slot.id, jugador });
+  }
+
+  // habilitar/deshabilitar nav
+  btnEquipoAnterior.disabled = (n <= 1);
+  btnEquipoSiguiente.disabled = (n >= subastas.cantJugadores);
+}
+
+function mostrarVisorEquipos(){
+  // ocultar juego subastas (la card FIN, botones pasar/comprar, etc)
+  if (sub_juegoSubastas) sub_juegoSubastas.classList.add("hidden");
+  if (visorEquipos) visorEquipos.classList.remove("hidden");
+
+  equipoJugadorActual = 1;
+  renderCanchaParaComprador(equipoJugadorActual);
+}
+
+// nav
+if (btnEquipoAnterior){
+  btnEquipoAnterior.addEventListener("click", () => {
+    if (equipoJugadorActual <= 1) return;
+    equipoJugadorActual--;
+    renderCanchaParaComprador(equipoJugadorActual);
   });
 }
+
+if (btnEquipoSiguiente){
+  btnEquipoSiguiente.addEventListener("click", () => {
+    if (equipoJugadorActual >= subastas.cantJugadores) return;
+    equipoJugadorActual++;
+    renderCanchaParaComprador(equipoJugadorActual);
+  });
+}
+
 
 
 
