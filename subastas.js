@@ -48,6 +48,30 @@ const sub_btnCancelarCompra = document.getElementById("btn-compra-cancelar");
 const sub_btnConfirmarCompra = document.getElementById("btn-compra-confirmar");
 
 // ==============================
+// VISOR DE EQUIPOS (canchita por jugador)
+// ==============================
+const visorEquipos = document.getElementById("visor-equipos");
+const cancha = document.getElementById("cancha");
+const equipoTitulo = document.getElementById("equipo-titulo");
+const btnEquipoAnterior = document.getElementById("btn-equipo-anterior");
+const btnEquipoSiguiente = document.getElementById("btn-equipo-siguiente");
+
+/*
+  POSICIONES: x/y en % dentro de la cancha
+  Si querés “acomodar”, tocás estos números.
+  (Están separados para que en iPad no se pisen tanto)
+*/
+const POSICIONES = [
+  { id: "base",      label: "Base",      x: 72, y: 36 },
+  { id: "escolta",   label: "Escolta",   x: 20, y: 0},
+  { id: "alero",     label: "Alero",     x: 20, y: 72 },
+  { id: "alapivot",  label: "Ala-Pívot", x: 40, y: 25 },
+  { id: "pivot",     label: "Pívot",     x: 22, y: 45 },
+];
+
+let equipoJugadorActual = 1;
+
+// ==============================
 // Helpers
 // ==============================
 function sub_slugifyNombre(nombre) {
@@ -73,6 +97,38 @@ function sub_setSelectCompradores(cant) {
     opt.textContent = `Jugador ${i}`;
     sub_selectComprador.appendChild(opt);
   }
+}
+
+function sub_slug(nombre) {
+  return nombre
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "-");
+}
+
+// ==============================
+// Responsive bubbles (iPad/PC)
+// ==============================
+function ajustarEscalaBurbujas(){
+  if (!cancha) return;
+
+  const w = cancha.clientWidth;
+  if (!w) return;
+
+  // Tamaño relativo al ancho de la cancha
+  // bubbleW: 15% a 18% aprox. con límites
+  const bubbleW = Math.max(56, Math.min(92, Math.round(w * 0.17)));
+
+  // ⬅️ Acá va lo que preguntabas:
+  // 1.45 = más alta, entra bien el texto de posición
+  const bubbleH = Math.round(bubbleW * 1.45);
+
+  // Imagen: un poquito más chica proporcional para dejar aire al texto
+  const imgH = Math.round(bubbleH * 0.54);
+
+  cancha.style.setProperty("--bubble-w", bubbleW + "px");
+  cancha.style.setProperty("--bubble-h", bubbleH + "px");
+  cancha.style.setProperty("--img-h", imgH + "px");
 }
 
 // ==============================
@@ -113,7 +169,7 @@ function sub_mostrarActual() {
 
   const persona = subastas.ordenRonda[subastas.idxEnRonda];
 
-  sub_contadorSpan.textContent = `Jugador ${subastas.idxEnRonda + 1} / ${total}`;
+  sub_contadorSpan.textContent = `Carta ${subastas.idxEnRonda + 1} / ${total}`;
   sub_subastaNombre.textContent = persona.nombre;
   sub_subastaClub.textContent = persona.club || "-";
 
@@ -160,6 +216,7 @@ function sub_confirmarCompraDesdeModal() {
     return;
   }
 
+  // ✅ registrar compra
   setRonda.add(comprador);
 
   subastas.compras.push({
@@ -169,10 +226,14 @@ function sub_confirmarCompraDesdeModal() {
     monto
   });
 
-  sub_renderLog();
   sub_cerrarModalCompra();
+  sub_renderLog();
 
-  // si ya compraron todos → siguiente ronda
+  // ✅ visor siempre visible + refresco del equipo del comprador
+  if (visorEquipos) visorEquipos.classList.remove("hidden");
+  renderCanchaParaComprador(comprador);
+
+  // ✅ si ya compraron todos -> siguiente ronda (máx 5)
   if (setRonda.size >= subastas.cantJugadores) {
     subastas.ronda++;
     if (subastas.ronda > 5) {
@@ -183,6 +244,7 @@ function sub_confirmarCompraDesdeModal() {
     return;
   }
 
+  // ✅ seguir con la siguiente carta en la misma ronda
   sub_pasarSiguiente();
 }
 
@@ -203,125 +265,11 @@ function sub_renderLog() {
 function sub_finalizarSubastas() {
   sub_rondaLabel.textContent = "Subastas finalizadas";
   sub_contadorSpan.textContent = "";
-
-  // en vez de mostrar FIN, mostramos canchitas
-  mostrarVisorEquipos();
 }
 
-
 // ==============================
-// Navegación
+// Drag + Snap + Swap (visor)
 // ==============================
-sub_btnIrSubastas.addEventListener("click", () => {
-  sub_menuPrincipal.classList.add("hidden");
-  sub_pantallaCharadas.classList.add("hidden");
-  sub_pantallaSubastas.classList.remove("hidden");
-
-  sub_configSubastas.classList.remove("hidden");
-  sub_juegoSubastas.classList.add("hidden");
-});
-
-sub_btnVolverMenuSubastas.addEventListener("click", () => {
-  sub_pantallaSubastas.classList.add("hidden");
-  sub_menuPrincipal.classList.remove("hidden");
-});
-
-// ==============================
-// Config cantidad jugadores
-// ==============================
-document.querySelectorAll("#config-subastas .btn-primario").forEach(btn => {
-  btn.addEventListener("click", () => {
-    subastas.cantJugadores = Number(btn.dataset.cant);
-
-    subastas.ronda = 1;
-    subastas.compras = [];
-    subastas.compradoresRonda = {};
-
-    sub_setSelectCompradores(subastas.cantJugadores);
-
-    sub_configSubastas.classList.add("hidden");
-    sub_juegoSubastas.classList.remove("hidden");
-
-    sub_btnPasar.disabled = false;
-    sub_btnComprar.disabled = false;
-
-    sub_renderLog();
-    sub_iniciarRonda();
-  });
-});
-
-// ==============================
-// Botones
-// ==============================
-sub_btnPasar.addEventListener("click", sub_pasarSiguiente);
-sub_btnComprar.addEventListener("click", sub_comprarActual);
-
-sub_btnCancelarCompra.addEventListener("click", sub_cerrarModalCompra);
-sub_modalBackdrop.addEventListener("click", sub_cerrarModalCompra);
-sub_btnConfirmarCompra.addEventListener("click", sub_confirmarCompraDesdeModal);
-
-sub_inputMonto.addEventListener("keydown", e => {
-  if (e.key === "Enter") sub_confirmarCompraDesdeModal();
-  if (e.key === "Escape") sub_cerrarModalCompra();
-});
-
-// ==============================
-// VISOR DE EQUIPOS (canchita por jugador)
-// ==============================
-
-const visorEquipos = document.getElementById("visor-equipos");
-const cancha = document.getElementById("cancha");
-const equipoTitulo = document.getElementById("equipo-titulo");
-const btnEquipoAnterior = document.getElementById("btn-equipo-anterior");
-const btnEquipoSiguiente = document.getElementById("btn-equipo-siguiente");
-
-const POSICIONES = [
-  { id: "base",      label: "Base",      x: 75, y: 45 },
-  { id: "escolta",   label: "Escolta",   x: 25, y: 15 },
-  { id: "alero",     label: "Alero",     x: 25, y: 88 },
-  { id: "alapivot",  label: "Ala-Pívot", x: 45, y: 35 },
-  { id: "pivot",     label: "Pívot",     x: 30, y: 58 },
-];
-
-let equipoJugadorActual = 1;
-let bubbles = []; // [{el, slotId, jugador}]
-
-function sub_slug(nombre) {
-  return nombre
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-");
-}
-
-function setPosPercent(el, xPct, yPct){
-  el.style.left = xPct + "%";
-  el.style.top  = yPct + "%";
-}
-
-function crearBubbleEquipo(jugador, slot){
-  const el = document.createElement("div");
-  el.className = "player-bubble";
-  el.innerHTML = `
-    <img alt="${jugador.nombre}" />
-    <div class="pname">${jugador.nombre}</div>
-    <div class="ppos">${slot.label}</div>
-  `;
-
-  const img = el.querySelector("img");
-  img.src = `img/${sub_slug(jugador.nombre)}.png`;
-  img.onerror = () => {
-    img.onerror = null;
-    img.src = "img/jugadores.png"; // fallback
-  };
-
-  // posición inicial por slot
-  el.dataset.slot = slot.id;
-  el.style.left = slot.x + "%";
-  el.style.top  = slot.y + "%";
-
-  return el;
-}
-
 function habilitarDragSnapSwapVisor() {
   if (!cancha) return;
 
@@ -413,6 +361,33 @@ function habilitarDragSnapSwapVisor() {
   });
 }
 
+// ==============================
+// Equipo -> cancha
+// ==============================
+function crearBubbleEquipo(jugador, slot){
+  const el = document.createElement("div");
+  el.className = "player-bubble";
+  el.innerHTML = `
+    <img alt="${jugador.nombre}" />
+    <div class="pname">${jugador.nombre}</div>
+    <div class="ppos">${slot.label}</div>
+  `;
+
+  const img = el.querySelector("img");
+  img.src = `img/${sub_slug(jugador.nombre)}.png`;
+  img.onerror = () => {
+    img.onerror = null;
+    img.src = "img/jugadores.png"; // fallback
+  };
+
+  // posición inicial por slot
+  el.dataset.slot = slot.id;
+  el.style.left = slot.x + "%";
+  el.style.top  = slot.y + "%";
+
+  return el;
+}
+
 function getEquipoPorComprador(n){
   return subastas.compras
     .filter(c => c.comprador === n)
@@ -425,6 +400,9 @@ function renderCanchaParaComprador(n){
     console.error("Faltan elementos del visor en el HTML:", { visorEquipos, cancha, equipoTitulo });
     return;
   }
+
+  // ✅ recalcular escala según tamaño real de la cancha
+  ajustarEscalaBurbujas();
 
   equipoTitulo.textContent = `Equipo — Jugador ${n}`;
   cancha.innerHTML = "";
@@ -446,22 +424,6 @@ function renderCanchaParaComprador(n){
   habilitarDragSnapSwapVisor();
 }
 
-function mostrarVisorEquipos(){
-  // oculto el juego y muestro visor
-  if (sub_juegoSubastas) sub_juegoSubastas.classList.add("hidden");
-  if (sub_configSubastas) sub_configSubastas.classList.add("hidden");
-
-  if (!visorEquipos) {
-    console.error("No existe #visor-equipos en el HTML");
-    return;
-  }
-
-  visorEquipos.classList.remove("hidden");
-
-  equipoJugadorActual = 1;
-  renderCanchaParaComprador(equipoJugadorActual);
-}
-
 // nav visor
 if (btnEquipoAnterior){
   btnEquipoAnterior.addEventListener("click", () => {
@@ -478,6 +440,83 @@ if (btnEquipoSiguiente){
     renderCanchaParaComprador(equipoJugadorActual);
   });
 }
+
+// ==============================
+// Navegación (pantallas)
+// ==============================
+sub_btnIrSubastas.addEventListener("click", () => {
+  sub_menuPrincipal.classList.add("hidden");
+  sub_pantallaCharadas.classList.add("hidden");
+  sub_pantallaSubastas.classList.remove("hidden");
+
+  sub_configSubastas.classList.remove("hidden");
+  sub_juegoSubastas.classList.add("hidden");
+});
+
+sub_btnVolverMenuSubastas.addEventListener("click", () => {
+  sub_pantallaSubastas.classList.add("hidden");
+  sub_menuPrincipal.classList.remove("hidden");
+});
+
+// ==============================
+// Config cantidad jugadores
+// ==============================
+document.querySelectorAll("#config-subastas .btn-primario").forEach(btn => {
+  btn.addEventListener("click", () => {
+    subastas.cantJugadores = Number(btn.dataset.cant);
+
+    subastas.ronda = 1;
+    subastas.compras = [];
+    subastas.compradoresRonda = {};
+
+    sub_setSelectCompradores(subastas.cantJugadores);
+
+    sub_configSubastas.classList.add("hidden");
+    sub_juegoSubastas.classList.remove("hidden");
+
+    sub_btnPasar.disabled = false;
+    sub_btnComprar.disabled = false;
+
+    // ✅ mostrar visor desde el inicio
+    if (visorEquipos) visorEquipos.classList.remove("hidden");
+    equipoJugadorActual = 1;
+
+    // render inicial (vacío) + escala correcta
+    renderCanchaParaComprador(equipoJugadorActual);
+
+    sub_renderLog();
+    sub_iniciarRonda();
+  });
+});
+
+// ==============================
+// Botones
+// ==============================
+sub_btnPasar.addEventListener("click", sub_pasarSiguiente);
+sub_btnComprar.addEventListener("click", sub_comprarActual);
+
+sub_btnCancelarCompra.addEventListener("click", sub_cerrarModalCompra);
+sub_modalBackdrop.addEventListener("click", sub_cerrarModalCompra);
+sub_btnConfirmarCompra.addEventListener("click", sub_confirmarCompraDesdeModal);
+
+sub_inputMonto.addEventListener("keydown", e => {
+  if (e.key === "Enter") sub_confirmarCompraDesdeModal();
+  if (e.key === "Escape") sub_cerrarModalCompra();
+});
+
+// ==============================
+// Recalcular escalas al cambiar tamaño/orientación
+// ==============================
+window.addEventListener("resize", () => {
+  ajustarEscalaBurbujas();
+  renderCanchaParaComprador(equipoJugadorActual);
+});
+
+window.addEventListener("orientationchange", () => {
+  ajustarEscalaBurbujas();
+  renderCanchaParaComprador(equipoJugadorActual);
+});
+
 
 
 
