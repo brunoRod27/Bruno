@@ -200,21 +200,26 @@ function sub_confirmarCompraDesdeModal() {
   const monto = Number(String(sub_inputMonto.value).replace(",", "."));
 
   if (!Number.isInteger(comprador) || comprador < 1 || comprador > subastas.cantJugadores) {
-    alert("Comprador inválido.");
-    return;
+   alert("Comprador inválido.");
+sub_cerrarModalCompra();
+return;
+
   }
 
   if (!Number.isFinite(monto) || monto < 0) {
     alert("Monto inválido.");
-    return;
+sub_cerrarModalCompra();
+return;
+
   }
 
   const setRonda = subastas.compradoresRonda[subastas.ronda];
 
-  if (setRonda.has(comprador)) {
-    alert(`El Jugador ${comprador} ya compró en esta ronda.`);
-    return;
-  }
+ if (setRonda.has(comprador)) {
+  alert(`El Jugador ${comprador} ya compró en esta ronda.`);
+  sub_cerrarModalCompra(); // ✅ libera el visor (backdrop deja de bloquear)
+  return;
+}
 
   // ✅ registrar compra
   setRonda.add(comprador);
@@ -231,7 +236,9 @@ function sub_confirmarCompraDesdeModal() {
 
   // ✅ visor siempre visible + refresco del equipo del comprador
   if (visorEquipos) visorEquipos.classList.remove("hidden");
-  renderCanchaParaComprador(comprador);
+equipoJugadorActual = comprador;          // ✅ sincroniza el estado
+renderCanchaParaComprador(equipoJugadorActual);
+
 
   // ✅ si ya compraron todos -> siguiente ronda (máx 5)
   if (setRonda.size >= subastas.cantJugadores) {
@@ -396,6 +403,7 @@ function getEquipoPorComprador(n){
 }
 
 function renderCanchaParaComprador(n){
+  equipoJugadorActual = n
   if (!visorEquipos || !cancha || !equipoTitulo) {
     console.error("Faltan elementos del visor en el HTML:", { visorEquipos, cancha, equipoTitulo });
     return;
