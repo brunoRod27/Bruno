@@ -40,6 +40,14 @@
                 <p class="card-text">Comprá jugadores por rondas.</p>
               </div>
             </article>
+
+            <!-- 🟥 NUEVO: IMPOSTOR -->
+            <article class="card card-menu card-menu-impostor" id="btn-ir-impostor">
+              <div class="card-content">
+                <h2 class="card-title">Impostor</h2>
+                <p class="card-text">1 palabra, 1 impostor. ¿Quién es?</p>
+              </div>
+            </article>
           </div>
         </section>
 
@@ -102,7 +110,6 @@
               <button class="btn-primario" data-cant="4">4</button>
               <button class="btn-primario" data-cant="5">5</button>
             </div>
-            
           </section>
 
           <!-- Juego -->
@@ -123,78 +130,177 @@
             </div>
             <div id="subasta-precio" class="subasta-precio"></div>
 
-
             <div class="juego-botones">
               <button id="btn-subasta-pasar" class="btn-secundario">Pasar</button>
               <button id="btn-subasta-comprar" class="btn-primario">Comprar</button>
             </div>
 
             <div class="subastas-log" id="subastas-log"></div>
-
             <div class="subastas-presupuestos" id="subastas-presupuestos"></div>
-
           </section>
+
           <!-- 🟤 VISOR DE EQUIPOS (canchita por jugador) -->
-<div id="visor-equipos" class="hidden">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <button id="btn-equipo-anterior" class="btn-secundario">Anterior</button>
-    <div id="equipo-titulo" style="font-weight:700;"></div>
-    <button id="btn-equipo-siguiente" class="btn-secundario">Siguiente</button>
-  </div>
+          <div id="visor-equipos" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <button id="btn-equipo-anterior" class="btn-secundario">Anterior</button>
+              <div id="equipo-titulo" style="font-weight:700;"></div>
+              <button id="btn-equipo-siguiente" class="btn-secundario">Siguiente</button>
+            </div>
 
-  <div id="cancha" class="cancha"></div>
-</div>
-
+            <div id="cancha" class="cancha"></div>
+          </div>
 
           <!-- 🧾 MODAL COMPRA (mobile friendly) -->
-<div id="modal-compra" class="modal hidden" aria-hidden="true">
-  <div class="modal-backdrop" id="modal-compra-backdrop"></div>
+          <div id="modal-compra" class="modal hidden" aria-hidden="true">
+            <div class="modal-backdrop" id="modal-compra-backdrop"></div>
 
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-compra-titulo">
-    <h3 id="modal-compra-titulo" class="modal-titulo">Comprar jugador</h3>
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-compra-titulo">
+              <h3 id="modal-compra-titulo" class="modal-titulo">Comprar jugador</h3>
 
-    <div class="modal-row">
-      <label class="modal-label" for="compra-comprador">¿Quién compra?</label>
-      <select id="compra-comprador" class="modal-input">
-        <option value="1">Jugador 1</option>
-        <option value="2">Jugador 2</option>
-        <option value="3">Jugador 3</option>
-        <option value="4">Jugador 4</option>
-        <option value="5">Jugador 5</option>
-      </select>
-    </div>
+              <div class="modal-row">
+                <label class="modal-label" for="compra-comprador">¿Quién compra?</label>
+                <select id="compra-comprador" class="modal-input">
+                  <option value="1">Jugador 1</option>
+                  <option value="2">Jugador 2</option>
+                  <option value="3">Jugador 3</option>
+                  <option value="4">Jugador 4</option>
+                  <option value="5">Jugador 5</option>
+                </select>
+              </div>
 
-    <div class="modal-row">
-      <label class="modal-label" for="compra-monto">Monto final</label>
-      <input
-        id="compra-monto"
-        class="modal-input"
-        type="number"
-        inputmode="decimal"
-        min="0"
-        step="0.01"
-        placeholder="Ej: 1500"
-      />
-    </div>
+              <div class="modal-row">
+                <label class="modal-label" for="compra-monto">Monto final</label>
+                <input
+                  id="compra-monto"
+                  class="modal-input"
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="0.01"
+                  placeholder="Ej: 1500"
+                />
+              </div>
 
-    <div class="modal-actions">
-      <button id="btn-compra-cancelar" class="btn-secundario">Cancelar</button>
-      <button id="btn-compra-confirmar" class="btn-primario">Confirmar</button>
-    </div>
-  </div>
-</div>
+              <div class="modal-actions">
+                <button id="btn-compra-cancelar" class="btn-secundario">Cancelar</button>
+                <button id="btn-compra-confirmar" class="btn-primario">Confirmar</button>
+              </div>
+            </div>
+          </div>
+        </section>
 
+        <!-- 🟥 PANTALLA IMPOSTOR -->
+        <section id="pantalla-impostor" class="hidden">
+          <button id="btn-volver-menu-impostor" class="btn-volver-menu">← Volver al menú</button>
+
+          <!-- Config -->
+          <section id="config-impostor">
+            <h2 class="menu-titulo">Impostor</h2>
+            <p class="subtitulo">Elegí jugadores, impostores y categoría</p>
+
+            <div class="modal-row">
+              <label class="modal-label" for="imp-cant">Cantidad de jugadores</label>
+              <select id="imp-cant" class="modal-input">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5" selected>5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </select>
+            </div>
+
+            <div class="modal-row">
+              <label class="modal-label" for="imp-impostores">Impostores</label>
+              <select id="imp-impostores" class="modal-input">
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+              </select>
+            </div>
+
+            <div class="modal-row">
+              <label class="modal-label" for="imp-categoria">Categoría</label>
+              <!-- Se llena desde categorias.js -->
+              <select id="imp-categoria" class="modal-input"></select>
+            </div>
+
+            <div class="juego-botones">
+              <button id="btn-imp-iniciar" class="btn-primario">Iniciar</button>
+            </div>
+          </section>
+
+          <!-- Revelado (pasar el celu) -->
+          <section id="juego-impostor" class="hidden">
+            <div class="juego-header">
+              <button id="btn-imp-cancelar" class="btn-volver">← Config</button>
+              <span id="imp-progreso" class="modo-label">Jugador 1 / 5</span>
+              <span id="imp-fase" class="timer">Revelar</span>
+            </div>
+
+            <div class="subastas-log" id="imp-ayuda" style="margin-top:12px;">
+              Tip: mirá tu rol y ocultalo antes de pasar el celu.
+            </div>
+          </section>
+
+          <!-- Final -->
+          <section id="fin-impostor" class="hidden">
+            <h2 class="menu-titulo">Listo ✅</h2>
+            <p class="subtitulo" style="text-align:center;">
+              Ahora hagan preguntas y voten quién creen que es el impostor.
+            </p>
+
+            <div class="juego-botones" style="margin-top:14px;">
+              <button id="btn-imp-reiniciar" class="btn-primario">Jugar otra</button>
+            </div>
+          </section>
         </section>
       </main>
     </div>
 
-    <!-- IMPORTANTE: orden -->
+    <!-- ==============================
+     MODAL REVEAL IMPOSTOR (PRO)
+============================== -->
+<div id="imp-modal" class="imp-modal hidden" aria-hidden="true">
+  <div id="imp-modal-backdrop" class="imp-modal-backdrop"></div>
+
+  <div class="imp-modal-card" role="dialog" aria-modal="true">
+    <div class="imp-modal-top">
+      <div id="imp-modal-badge" class="imp-modal-badge">ROL</div>
+      <button id="imp-modal-close" class="imp-modal-close">✕</button>
+    </div>
+
+    <div class="imp-modal-visual">
+      <img id="imp-modal-img" class="imp-modal-img hidden" alt="Imagen" />
+      <div id="imp-modal-img-fallback" class="imp-modal-img-fallback hidden">SIN IMAGEN</div>
+    </div>
+
+    <div id="imp-modal-title" class="imp-modal-title">-</div>
+    <div id="imp-modal-sub" class="imp-modal-sub">-</div>
+
+    <div class="imp-modal-actions">
+      <button id="imp-modal-hide" class="btn-primario">Ocultar</button>
+    </div>
+  </div>
+</div>
+
+
     <script src="datos.js"></script>
-    <script src="precios.js"></script>
-    <script src="charadas.js"></script>
-    <script src="subastas.js"></script>
+<script src="precios.js"></script>
+
+<!-- 👇 ESTE tiene que ir antes de impostor.js -->
+<script src="categorias.js"></script>
+
+<script src="charadas.js"></script>
+<script src="subastas.js"></script>
+
+<!-- 👇 el impostor al final -->
+<script src="impostor.js"></script>
+
   </body>
 </html>
+
 
 
 

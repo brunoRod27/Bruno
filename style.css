@@ -642,6 +642,120 @@ body {
 }
 
 
+/* ============================
+   IMPOSTOR - MODAL PRO
+============================ */
+.imp-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+.imp-modal-backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.70);
+  backdrop-filter: blur(6px);
+}
+
+.imp-modal-card{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  width: calc(100% - 34px);
+  max-width: 420px;
+
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.80);
+  padding: 16px;
+
+  animation: impPop 220ms ease-out forwards;
+}
+
+@keyframes impPop{
+  from { transform: translate(-50%, -50%) scale(0.86); opacity: 0.2; }
+  to   { transform: translate(-50%, -50%) scale(1.00); opacity: 1; }
+}
+
+.imp-modal-top{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap: 12px;
+}
+
+.imp-modal-badge{
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(59,130,246,0.20);
+  border: 1px solid rgba(59,130,246,0.35);
+  color: #bfdbfe;
+}
+
+.imp-modal-close{
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  color: white;
+  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+}
+
+.imp-modal-visual{
+  margin-top: 12px;
+  width: 100%;
+  height: 220px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.22);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position: relative;
+}
+
+.imp-modal-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.imp-modal-img-fallback{
+  font-size: 14px;
+  color: rgba(255,255,255,0.70);
+  letter-spacing: 1px;
+}
+
+.imp-modal-title{
+  margin-top: 12px;
+  text-align:center;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.imp-modal-sub{
+  margin-top: 4px;
+  text-align:center;
+  font-size: 13px;
+  color: #c8c8ff;
+}
+
+.imp-modal-actions{
+  margin-top: 14px;
+  display:flex;
+  justify-content:center;
+}
+
+
+
 
 
 

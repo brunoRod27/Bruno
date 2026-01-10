@@ -98,7 +98,7 @@ function sub_slugifyNombre(nombre) {
 }
 
 function sub_rutaFotoPersona(persona) {
-  return `img/${sub_slugifyNombre(persona.nombre)}.png`;
+  return `img/jugadores-lub/${sub_slugifyNombre(persona.nombre)}.png`;
 }
 
 function sub_mezclar(arr) {
@@ -438,10 +438,10 @@ function crearBubbleEquipo(jugador, slot){
   `;
 
   const img = el.querySelector("img");
-  img.src = `img/${sub_slugifyNombre(jugador.nombre)}.png`;
+  img.src = `img/jugadores-lub/${sub_slugifyNombre(jugador.nombre)}.png`;
   img.onerror = () => {
     img.onerror = null;
-    img.src = "img/jugadores.png";
+    img.src = "img/jugadores-lub/jugadores.png";
   };
 
   el.dataset.slot = slot.id;
