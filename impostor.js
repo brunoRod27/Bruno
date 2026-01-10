@@ -3,13 +3,19 @@
   // IMPOSTOR - ESTADO
   // ==============================
   const imp = {
+    finPendiente: false,
     cant: 5,
     impostores: 1,
     categoriaKey: null,
     palabra: null,
     roles: [],          // "IMPOSTOR" o palabra
     revelados: [],      // boolean por jugador
+
+    // ✅ NUEVO: doble pantalla
+    paso: "GRID",       // "GRID" | "CONFIRM"
+    pendiente: null     // index del jugador seleccionado
   };
+
   // ==============================
   // Helpers DOM
   // ==============================
@@ -53,91 +59,103 @@
   const imp_modalTitle = $("imp-modal-title");
   const imp_modalSub = $("imp-modal-sub");
 
- function imp_openModal({ isImpostor, titulo, subtitulo, imgSrc }) {
-  // Fallback por si no agregaste el HTML del modal
-  if (!imp_modal) {
-    alert(isImpostor ? "😈 SOS EL IMPOSTOR" : `✅ TU PALABRA ES:\n\n${titulo}`);
-    return;
-  }
-
-  // ✅ Badge
-  if (imp_modalBadge) {
-    imp_modalBadge.textContent = isImpostor ? "IMPOSTOR" : "TU PALABRA";
-    imp_modalBadge.style.background = isImpostor ? "rgba(239,68,68,0.18)" : "rgba(59,130,246,0.20)";
-    imp_modalBadge.style.borderColor = isImpostor ? "rgba(239,68,68,0.40)" : "rgba(59,130,246,0.35)";
-    imp_modalBadge.style.color = isImpostor ? "#fecaca" : "#bfdbfe";
-  }
-
-  // ✅ Textos
-  if (imp_modalTitle) imp_modalTitle.textContent = titulo || "-";
-  if (imp_modalSub) imp_modalSub.textContent = subtitulo || "";
-
-  // ✅ LIMPIEZA ANTES DE MOSTRAR (mata el frame anterior)
-  if (imp_modalImg) {
-    imp_modalImg.onload = null;
-    imp_modalImg.onerror = null;
-    imp_modalImg.classList.add("hidden"); // nunca mostrar si no cargó
-    imp_modalImg.src = "";               // corta lo anterior
-  }
-  if (imp_modalImgFallback) {
-    imp_modalImgFallback.classList.add("hidden");
-    imp_modalImgFallback.textContent = "";
-  }
-
-  // ✅ Mostrar modal ya (pero imagen sigue oculta)
-  imp_modal.classList.remove("hidden");
-  imp_modal.setAttribute("aria-hidden", "false");
-
-  // ✅ Si no hay imagen, mostrar fallback
-  if (!imgSrc) {
-    if (imp_modalImgFallback) {
-      imp_modalImgFallback.classList.remove("hidden");
-      imp_modalImgFallback.textContent = isImpostor ? "IMPOSTOR" : "SIN IMAGEN";
+  function imp_openModal({ isImpostor, titulo, subtitulo, imgSrc }) {
+    // Fallback por si no agregaste el HTML del modal
+    if (!imp_modal) {
+      alert(isImpostor ? "😈 SOS EL IMPOSTOR" : `✅ TU PALABRA ES:\n\n${titulo}`);
+      return;
     }
-    return;
-  }
 
-  // ✅ Cargar imagen “offscreen”: solo aparece cuando terminó de cargar
-  const pre = new Image();
-  pre.onload = () => {
-    // si el modal se cerró antes de que termine de cargar, no hacemos nada
-    if (!imp_modal || imp_modal.classList.contains("hidden")) return;
+    // ✅ Badge
+    if (imp_modalBadge) {
+      imp_modalBadge.textContent = isImpostor ? "IMPOSTOR" : "TU PALABRA";
+      imp_modalBadge.style.background = isImpostor
+        ? "rgba(239,68,68,0.18)"
+        : "rgba(59,130,246,0.20)";
+      imp_modalBadge.style.borderColor = isImpostor
+        ? "rgba(239,68,68,0.40)"
+        : "rgba(59,130,246,0.35)";
+      imp_modalBadge.style.color = isImpostor ? "#fecaca" : "#bfdbfe";
+    }
 
+    // ✅ Textos
+    if (imp_modalTitle) imp_modalTitle.textContent = titulo || "-";
+    if (imp_modalSub) imp_modalSub.textContent = subtitulo || "";
+
+    // ✅ Limpieza ANTES de mostrar (anti frame viejo)
     if (imp_modalImg) {
       imp_modalImg.onload = null;
       imp_modalImg.onerror = null;
-      imp_modalImg.src = imgSrc;
-      imp_modalImg.classList.remove("hidden");
+      imp_modalImg.classList.add("hidden");
+      imp_modalImg.src = "";
     }
-  };
-  pre.onerror = () => {
-    if (!imp_modal || imp_modal.classList.contains("hidden")) return;
     if (imp_modalImgFallback) {
-      imp_modalImgFallback.classList.remove("hidden");
-      imp_modalImgFallback.textContent = "SIN IMAGEN";
+      imp_modalImgFallback.classList.add("hidden");
+      imp_modalImgFallback.textContent = "";
     }
-  };
-  pre.src = imgSrc;
-}
 
-function imp_closeModal() {
-  if (!imp_modal) return;
+    // ✅ Mostrar modal ya (pero imagen sigue oculta hasta cargar)
+    imp_modal.classList.remove("hidden");
+    imp_modal.setAttribute("aria-hidden", "false");
 
-  // 🔥 Limpieza fuerte anti “flash”
-  if (imp_modalImg) {
-    imp_modalImg.onload = null;
-    imp_modalImg.onerror = null;
-    imp_modalImg.src = "";
-    imp_modalImg.classList.add("hidden");
+    // ✅ Si no hay imagen, mostrar fallback
+    if (!imgSrc) {
+      if (imp_modalImgFallback) {
+        imp_modalImgFallback.classList.remove("hidden");
+        imp_modalImgFallback.textContent = isImpostor ? "IMPOSTOR" : "TOCÁ PARA REVELAR";
+      }
+      return;
+    }
+
+    // ✅ Cargar imagen “offscreen”: solo aparece cuando terminó de cargar
+    const pre = new Image();
+    pre.onload = () => {
+      if (!imp_modal || imp_modal.classList.contains("hidden")) return;
+
+      if (imp_modalImg) {
+        imp_modalImg.onload = null;
+        imp_modalImg.onerror = null;
+        imp_modalImg.src = imgSrc;
+        imp_modalImg.classList.remove("hidden");
+      }
+    };
+    pre.onerror = () => {
+      if (!imp_modal || imp_modal.classList.contains("hidden")) return;
+      if (imp_modalImgFallback) {
+        imp_modalImgFallback.classList.remove("hidden");
+        imp_modalImgFallback.textContent = "SIN IMAGEN";
+      }
+    };
+    pre.src = imgSrc;
   }
-  if (imp_modalImgFallback) {
-    imp_modalImgFallback.classList.add("hidden");
-    imp_modalImgFallback.textContent = "";
+
+  function imp_closeModal() {
+    if (!imp_modal) return;
+
+    // 🔥 Limpieza fuerte anti “flash”
+    if (imp_modalImg) {
+      imp_modalImg.onload = null;
+      imp_modalImg.onerror = null;
+      imp_modalImg.src = "";
+      imp_modalImg.classList.add("hidden");
+    }
+    if (imp_modalImgFallback) {
+      imp_modalImgFallback.classList.add("hidden");
+      imp_modalImgFallback.textContent = "";
+    }
+
+    // ✅ reset del confirm
+    imp_modal.dataset.confirm = "0";
+
+    imp_modal.classList.add("hidden");
+    imp_modal.setAttribute("aria-hidden", "true");
+      // ✅ Si ya revelaron todos, recién ahora pasamos al final
+  if (imp.finPendiente) {
+    imp.finPendiente = false;
+    imp_irFinal();
   }
 
-  imp_modal.classList.add("hidden");
-  imp_modal.setAttribute("aria-hidden", "true");
-}
+  }
 
   if (imp_modalBackdrop) imp_modalBackdrop.addEventListener("click", imp_closeModal);
   if (imp_modalClose) imp_modalClose.addEventListener("click", imp_closeModal);
@@ -270,61 +288,61 @@ function imp_closeModal() {
   }
 
   function imp_renderGrid() {
-  imp_crearGridSiNoExiste();
-  imp_grid.innerHTML = "";
+    imp_crearGridSiNoExiste();
+    imp_grid.innerHTML = "";
 
-  // ✅ Título cortito (opcional)
-  const titulo = document.createElement("div");
-  titulo.style.textAlign = "center";
-  titulo.style.fontWeight = "800";
-  titulo.style.fontSize = "20px";
-  titulo.style.marginBottom = "14px";
-  titulo.textContent = "Elegí tu jugador";
-  imp_grid.appendChild(titulo);
+    // ✅ Título cortito
+    const titulo = document.createElement("div");
+    titulo.style.textAlign = "center";
+    titulo.style.fontWeight = "800";
+    titulo.style.fontSize = "20px";
+    titulo.style.marginBottom = "14px";
+    titulo.textContent = "Elegí tu jugador";
+    imp_grid.appendChild(titulo);
 
-  // ✅ Grilla SIEMPRE vertical-friendly: 2 columnas
-  const grid = document.createElement("div");
-  grid.style.display = "grid";
-  grid.style.gridTemplateColumns = "repeat(2, 1fr)";
-  grid.style.gap = "12px";
+    // ✅ Grilla vertical-friendly: 2 columnas
+    const grid = document.createElement("div");
+    grid.style.display = "grid";
+    grid.style.gridTemplateColumns = "repeat(2, 1fr)";
+    grid.style.gap = "12px";
 
-  for (let i = 0; i < imp.cant; i++) {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "btn-secundario";
-    card.style.borderRadius = "16px";
-    card.style.padding = "18px 10px";
-    card.style.minHeight = "92px";
-    card.style.fontWeight = "800";
+    for (let i = 0; i < imp.cant; i++) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "btn-secundario";
+      card.style.borderRadius = "16px";
+      card.style.padding = "18px 10px";
+      card.style.minHeight = "92px";
+      card.style.fontWeight = "800";
 
-    if (!imp.revelados[i]) {
-      card.textContent = `Jugador ${i + 1}`;
-      card.addEventListener("click", () => imp_revelar(i));
-    } else {
-      card.disabled = true;
-      card.style.opacity = "0.55";
-      card.innerHTML = `
-        <div style="font-size:12px; opacity:.9;">Jugador ${i + 1}</div>
-        <div style="font-size:13px;">Revelado</div>
-      `;
+      if (!imp.revelados[i]) {
+        card.textContent = `Jugador ${i + 1}`;
+        // ✅ en vez de revelar directo, pasa a confirm
+        card.addEventListener("click", () => imp_prepararReveal(i));
+      } else {
+        card.disabled = true;
+        card.style.opacity = "0.55";
+        card.innerHTML = `
+          <div style="font-size:12px; opacity:.9;">Jugador ${i + 1}</div>
+          <div style="font-size:13px;">Revelado</div>
+        `;
+      }
+
+      grid.appendChild(card);
     }
 
-    grid.appendChild(card);
+    imp_grid.appendChild(grid);
+
+    // ✅ contador abajo
+    const footer = document.createElement("div");
+    footer.id = "imp-contador";
+    footer.style.textAlign = "center";
+    footer.style.marginTop = "14px";
+    footer.style.color = "#c8c8ff";
+    footer.style.fontSize = "13px";
+    footer.textContent = `Revelados: ${imp.revelados.filter(Boolean).length} / ${imp.cant}`;
+    imp_grid.appendChild(footer);
   }
-
-  imp_grid.appendChild(grid);
-
-  // ✅ contador chiquito abajo (opcional)
-  const footer = document.createElement("div");
-  footer.id = "imp-contador";
-  footer.style.textAlign = "center";
-  footer.style.marginTop = "14px";
-  footer.style.color = "#c8c8ff";
-  footer.style.fontSize = "13px";
-  footer.textContent = `Revelados: ${imp.revelados.filter(Boolean).length} / ${imp.cant}`;
-  imp_grid.appendChild(footer);
-}
-
 
   function imp_actualizarContador() {
     const el = $("imp-contador");
@@ -333,29 +351,66 @@ function imp_closeModal() {
   }
 
   // ==============================
-  // REVEAL (modal pro)
+  // IMÁGENES
   // ==============================
   function imp_resolverImagen(rol, categoriaKey) {
-  const cat = (categoriaKey || "").toLowerCase();
+    const cat = (categoriaKey || "").toLowerCase();
 
-  // 👹 Impostor especial LUB
-  if (rol === "IMPOSTOR" && cat.includes("lub")) {
-    return "img/impostor-lub.png"; // <-- tu imagen especial
+    // 👹 Impostor especial LUB
+    if (rol === "IMPOSTOR" && cat.includes("lub")) {
+      return "img/impostor-lub.png";
+    }
+
+    // R6: img/r6/<slug>.png
+    if (cat.includes("rainbow") || cat.includes("r6") || cat.includes("siege")) {
+      return `img/r6/${imp_slugify(rol)}.png`;
+    }
+
+    // LUB: img/jugadores-lub/<slug>.png
+    if (cat.includes("lub")) {
+      return `img/jugadores-lub/${imp_slugify(rol)}.png`;
+    }
+
+    return null;
   }
 
-  // R6: img/r6/<slug>.png
-  if (cat.includes("rainbow") || cat.includes("r6") || cat.includes("siege")) {
-    return `img/r6/${imp_slugify(rol)}.png`;
+  // ==============================
+  // ✅ DOBLE PANTALLA (CONFIRM)
+  // ==============================
+  function imp_prepararReveal(idx) {
+    if (imp.revelados[idx]) return;
+
+    // cerrá lo anterior sí o sí
+    imp_closeModal();
+
+    imp.paso = "CONFIRM";
+    imp.pendiente = idx;
+
+    // pantalla intermedia (sin imagen)
+    imp_openModal({
+      isImpostor: false,
+      titulo: `Jugador ${idx + 1}`,
+      subtitulo: "Tocá para revelar tu rol",
+      imgSrc: null
+    });
+
+    if (imp_modal) imp_modal.dataset.confirm = "1";
   }
 
-  // LUB: img/jugadores-lub/<slug>.png
-  if (cat.includes("lub")) {
-    return `img/jugadores-lub/${imp_slugify(rol)}.png`;
+  function imp_confirmarReveal() {
+    if (imp.paso !== "CONFIRM" || imp.pendiente === null) return;
+
+    const idx = imp.pendiente;
+    imp.pendiente = null;
+    imp.paso = "GRID";
+
+    // ahora sí revela
+    imp_revelar(idx);
   }
 
-  return null;
-}
-
+  // ==============================
+  // REVEAL REAL
+  // ==============================
   function imp_revelar(idx) {
   if (imp.revelados[idx]) return;
 
@@ -366,15 +421,16 @@ function imp_closeModal() {
     isImpostor: isImp,
     titulo: isImp ? "😈 SOS EL IMPOSTOR" : rol,
     subtitulo: isImp ? "No digas nada. Disimulá." : (imp.categoriaKey || ""),
-    imgSrc: imp_resolverImagen(rol, imp.categoriaKey) // ✅ acá
+    imgSrc: imp_resolverImagen(rol, imp.categoriaKey)
   });
 
   imp.revelados[idx] = true;
   imp_actualizarContador();
   imp_renderGrid();
 
+  // ✅ Si fue el último, NO cambies de pantalla todavía
   if (imp.revelados.every(Boolean)) {
-    imp_irFinal();
+    imp.finPendiente = true; // quedamos “esperando” que cierre el modal
   }
 }
 
@@ -398,6 +454,12 @@ function imp_closeModal() {
 
     imp.palabra = imp_elegirPalabra();
     imp_armarRoles();
+
+    // ✅ reset confirm
+    imp.paso = "GRID";
+    imp.pendiente = null;
+    if (imp_modal) imp_modal.dataset.confirm = "0";
+
     imp_irJuego();
     imp_renderGrid();
   }
@@ -407,6 +469,23 @@ function imp_closeModal() {
   // ==============================
   function imp_bind() {
     if (!imp_assertBase()) return;
+
+    // ✅ Si estamos en confirm, tocar el modal (salvo cerrar) confirma
+    if (imp_modal) {
+      imp_modal.dataset.confirm = "0";
+
+      imp_modal.addEventListener("click", (e) => {
+        const isClose =
+          e.target === imp_modalClose ||
+          e.target === imp_modalBackdrop ||
+          e.target === imp_modalHide;
+
+        if (!isClose && imp_modal.dataset.confirm === "1") {
+          imp_modal.dataset.confirm = "0";
+          imp_confirmarReveal();
+        }
+      });
+    }
 
     // Entrar a Impostor
     imp_btnIr.addEventListener("click", () => {
@@ -428,6 +507,11 @@ function imp_closeModal() {
     // Volver al menú principal
     imp_btnVolverMenu.addEventListener("click", () => {
       imp_closeModal();
+
+      // reset confirm
+      imp.paso = "GRID";
+      imp.pendiente = null;
+
       imp_pantalla.classList.add("hidden");
       if (imp_menuPrincipal) imp_menuPrincipal.classList.remove("hidden");
     });
@@ -436,16 +520,20 @@ function imp_closeModal() {
     imp_selCant.addEventListener("change", imp_ajustarOpcionesImpostores);
 
     imp_btnIniciar.addEventListener("click", imp_iniciar);
+
     imp_btnCancelar.addEventListener("click", () => {
       imp_closeModal();
+      imp.paso = "GRID";
+      imp.pendiente = null;
       imp_irConfig();
     });
+
     imp_btnReiniciar.addEventListener("click", () => {
       imp_closeModal();
       imp_iniciar();
     });
 
-    // Re-render al resize (para columnas)
+    // Re-render al resize
     window.addEventListener("resize", () => {
       if (!imp_juego.classList.contains("hidden")) {
         imp_renderGrid();
@@ -453,11 +541,12 @@ function imp_closeModal() {
     });
   }
 
-  // Espera a que el DOM exista (por las dudas)
+  // Espera a que el DOM exista
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", imp_bind);
   } else {
     imp_bind();
   }
 })();
+
 

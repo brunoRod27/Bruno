@@ -757,6 +757,9 @@ body {
 .imp-modal-img.hidden { display: none !important; }
 
 
+#imp-modal {
+  transition: opacity .12s ease;
+}
 
 
 
