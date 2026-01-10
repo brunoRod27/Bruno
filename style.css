@@ -754,6 +754,8 @@ body {
   justify-content:center;
 }
 
+.imp-modal-img.hidden { display: none !important; }
+
 
 
 

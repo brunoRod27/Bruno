@@ -10,7 +10,6 @@
     roles: [],          // "IMPOSTOR" o palabra
     revelados: [],      // boolean por jugador
   };
-
   // ==============================
   // Helpers DOM
   // ==============================
@@ -54,59 +53,91 @@
   const imp_modalTitle = $("imp-modal-title");
   const imp_modalSub = $("imp-modal-sub");
 
-  function imp_openModal({ isImpostor, titulo, subtitulo, imgSrc }) {
-    // Fallback por si no agregaste el HTML del modal
-    if (!imp_modal) {
-      alert(isImpostor ? "😈 SOS EL IMPOSTOR" : `✅ TU PALABRA ES:\n\n${titulo}`);
-      return;
+ function imp_openModal({ isImpostor, titulo, subtitulo, imgSrc }) {
+  // Fallback por si no agregaste el HTML del modal
+  if (!imp_modal) {
+    alert(isImpostor ? "😈 SOS EL IMPOSTOR" : `✅ TU PALABRA ES:\n\n${titulo}`);
+    return;
+  }
+
+  // ✅ Badge
+  if (imp_modalBadge) {
+    imp_modalBadge.textContent = isImpostor ? "IMPOSTOR" : "TU PALABRA";
+    imp_modalBadge.style.background = isImpostor ? "rgba(239,68,68,0.18)" : "rgba(59,130,246,0.20)";
+    imp_modalBadge.style.borderColor = isImpostor ? "rgba(239,68,68,0.40)" : "rgba(59,130,246,0.35)";
+    imp_modalBadge.style.color = isImpostor ? "#fecaca" : "#bfdbfe";
+  }
+
+  // ✅ Textos
+  if (imp_modalTitle) imp_modalTitle.textContent = titulo || "-";
+  if (imp_modalSub) imp_modalSub.textContent = subtitulo || "";
+
+  // ✅ LIMPIEZA ANTES DE MOSTRAR (mata el frame anterior)
+  if (imp_modalImg) {
+    imp_modalImg.onload = null;
+    imp_modalImg.onerror = null;
+    imp_modalImg.classList.add("hidden"); // nunca mostrar si no cargó
+    imp_modalImg.src = "";               // corta lo anterior
+  }
+  if (imp_modalImgFallback) {
+    imp_modalImgFallback.classList.add("hidden");
+    imp_modalImgFallback.textContent = "";
+  }
+
+  // ✅ Mostrar modal ya (pero imagen sigue oculta)
+  imp_modal.classList.remove("hidden");
+  imp_modal.setAttribute("aria-hidden", "false");
+
+  // ✅ Si no hay imagen, mostrar fallback
+  if (!imgSrc) {
+    if (imp_modalImgFallback) {
+      imp_modalImgFallback.classList.remove("hidden");
+      imp_modalImgFallback.textContent = isImpostor ? "IMPOSTOR" : "SIN IMAGEN";
     }
+    return;
+  }
 
-    // Badge
-    if (imp_modalBadge) {
-      imp_modalBadge.textContent = isImpostor ? "IMPOSTOR" : "TU PALABRA";
-      imp_modalBadge.style.background = isImpostor ? "rgba(239,68,68,0.18)" : "rgba(59,130,246,0.20)";
-      imp_modalBadge.style.borderColor = isImpostor ? "rgba(239,68,68,0.40)" : "rgba(59,130,246,0.35)";
-      imp_modalBadge.style.color = isImpostor ? "#fecaca" : "#bfdbfe";
-    }
+  // ✅ Cargar imagen “offscreen”: solo aparece cuando terminó de cargar
+  const pre = new Image();
+  pre.onload = () => {
+    // si el modal se cerró antes de que termine de cargar, no hacemos nada
+    if (!imp_modal || imp_modal.classList.contains("hidden")) return;
 
-    // Textos
-    if (imp_modalTitle) imp_modalTitle.textContent = titulo || "-";
-    if (imp_modalSub) imp_modalSub.textContent = subtitulo || "";
-
-    // Imagen
-    if (imp_modalImg) imp_modalImg.classList.add("hidden");
-    if (imp_modalImgFallback) imp_modalImgFallback.classList.add("hidden");
-
-    if (imgSrc && imp_modalImg) {
+    if (imp_modalImg) {
+      imp_modalImg.onload = null;
       imp_modalImg.onerror = null;
       imp_modalImg.src = imgSrc;
       imp_modalImg.classList.remove("hidden");
-
-      imp_modalImg.onerror = () => {
-        imp_modalImg.onerror = null;
-        imp_modalImg.classList.add("hidden");
-        if (imp_modalImgFallback) {
-          imp_modalImgFallback.classList.remove("hidden");
-          imp_modalImgFallback.textContent = "SIN IMAGEN";
-        }
-      };
-    } else {
-      if (imp_modalImgFallback) {
-        imp_modalImgFallback.classList.remove("hidden");
-        imp_modalImgFallback.textContent = "SIN IMAGEN";
-      }
     }
+  };
+  pre.onerror = () => {
+    if (!imp_modal || imp_modal.classList.contains("hidden")) return;
+    if (imp_modalImgFallback) {
+      imp_modalImgFallback.classList.remove("hidden");
+      imp_modalImgFallback.textContent = "SIN IMAGEN";
+    }
+  };
+  pre.src = imgSrc;
+}
 
-    // Mostrar
-    imp_modal.classList.remove("hidden");
-    imp_modal.setAttribute("aria-hidden", "false");
+function imp_closeModal() {
+  if (!imp_modal) return;
+
+  // 🔥 Limpieza fuerte anti “flash”
+  if (imp_modalImg) {
+    imp_modalImg.onload = null;
+    imp_modalImg.onerror = null;
+    imp_modalImg.src = "";
+    imp_modalImg.classList.add("hidden");
+  }
+  if (imp_modalImgFallback) {
+    imp_modalImgFallback.classList.add("hidden");
+    imp_modalImgFallback.textContent = "";
   }
 
-  function imp_closeModal() {
-    if (!imp_modal) return;
-    imp_modal.classList.add("hidden");
-    imp_modal.setAttribute("aria-hidden", "true");
-  }
+  imp_modal.classList.add("hidden");
+  imp_modal.setAttribute("aria-hidden", "true");
+}
 
   if (imp_modalBackdrop) imp_modalBackdrop.addEventListener("click", imp_closeModal);
   if (imp_modalClose) imp_modalClose.addEventListener("click", imp_closeModal);
