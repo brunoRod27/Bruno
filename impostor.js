@@ -93,6 +93,19 @@
       imp_modalImgFallback.classList.add("hidden");
       imp_modalImgFallback.textContent = "";
     }
+    // ✅ Si la categoría es Rainbow/R6/Siege, definimos cómo se ajusta la imagen
+const cat = (imp.categoriaKey || "").toLowerCase();
+const esR6 = cat.includes("rainbow") || cat.includes("r6") || cat.includes("siege");
+
+// Por defecto: cover (queda tipo card pro)
+// Si preferís que NO recorte nunca, poné true
+const r6SinRecorte = false;
+
+if (imp_modalImg) {
+  imp_modalImg.classList.remove("is-contain");
+  if (esR6 && r6SinRecorte) imp_modalImg.classList.add("is-contain");
+}
+
 
     // ✅ Mostrar modal ya (pero imagen sigue oculta hasta cargar)
     imp_modal.classList.remove("hidden");
@@ -102,7 +115,7 @@
     if (!imgSrc) {
       if (imp_modalImgFallback) {
         imp_modalImgFallback.classList.remove("hidden");
-        imp_modalImgFallback.textContent = isImpostor ? "IMPOSTOR" : "TOCÁ PARA REVELAR";
+        imp_modalImgFallback.textContent = isImpostor ? "IMPOSTOR" : "TOCÁ PARA REVELAR KBEZA";
       }
       return;
     }
@@ -354,25 +367,33 @@
   // IMÁGENES
   // ==============================
   function imp_resolverImagen(rol, categoriaKey) {
-    const cat = (categoriaKey || "").toLowerCase();
+  const cat = (categoriaKey || "").toLowerCase();
 
-    // 👹 Impostor especial LUB
-    if (rol === "IMPOSTOR" && cat.includes("lub")) {
-      return "img/impostor-lub.png";
-    }
-
-    // R6: img/r6/<slug>.png
-    if (cat.includes("rainbow") || cat.includes("r6") || cat.includes("siege")) {
-      return `img/r6/${imp_slugify(rol)}.png`;
-    }
-
-    // LUB: img/jugadores-lub/<slug>.png
-    if (cat.includes("lub")) {
-      return `img/jugadores-lub/${imp_slugify(rol)}.png`;
-    }
-
-    return null;
+  // 👹 Impostor especial LUB
+  if (rol === "IMPOSTOR" && cat.includes("lub")) {
+    return "img/impostor-lub.png";
   }
+
+  // 👹 Impostor especial R6
+  if (
+    rol === "IMPOSTOR" &&
+    (cat.includes("rainbow") || cat.includes("r6") || cat.includes("siege"))
+  ) {
+    return "img/impostor-r6.png";
+  }
+
+  // 🎯 Rainbow Six operators
+  if (cat.includes("rainbow") || cat.includes("r6") || cat.includes("siege")) {
+    return `img/r6/${imp_slugify(rol)}.png`;
+  }
+
+  // 🏀 LUB jugadores
+  if (cat.includes("lub")) {
+    return `img/jugadores-lub/${imp_slugify(rol)}.png`;
+  }
+
+  return null;
+}
 
   // ==============================
   // ✅ DOBLE PANTALLA (CONFIRM)
@@ -390,7 +411,7 @@
     imp_openModal({
       isImpostor: false,
       titulo: `Jugador ${idx + 1}`,
-      subtitulo: "Tocá para revelar tu rol",
+      subtitulo: "Tocá para revelar tu rol gil",
       imgSrc: null
     });
 

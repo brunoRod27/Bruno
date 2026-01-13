@@ -761,6 +761,40 @@ body {
   transition: opacity .12s ease;
 }
 
+/* =========================
+   IMPOSTOR MODAL - IMAGEN PRO
+========================= */
+
+.imp-modal-visual {
+  width: 100%;
+  max-width: 280px;       /* ajustá si querés más grande */
+  margin: 14px auto 10px;
+  border-radius: 18px;
+  overflow: hidden;
+
+  /* MISMO tamaño para todas */
+  aspect-ratio: 3 / 4;    /* tipo card vertical */
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+/* la imagen ocupa toda la “ventana” y NO se deforma */
+.imp-modal-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+
+  /* 🔥 foco más arriba (cara) */
+  object-position: 50% 20%;
+}
+
+
+/* si querés que NUNCA recorte (puede dejar bordes), usá esto con una clase */
+.imp-modal-img.is-contain {
+  object-fit: contain;
+  background: rgba(0,0,0,0.35);
+}
 
 
 
